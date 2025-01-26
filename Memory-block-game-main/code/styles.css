@@ -23,8 +23,13 @@ body {
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    transition: transform 0.5s;
+    transition: transform 0.3s;
     position: relative;
+}
+
+.block:hover {
+    transform: scale(1.1); 
+    background-color: #5a598a;
 }
 
 .block img {
