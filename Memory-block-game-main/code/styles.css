@@ -5,7 +5,9 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
-    background-color: #f0f0f0;
+    /* adding background interface */
+    background: url("https://wallpaperaccess.com/full/2641048.gif") no-repeat center;
+    background-size: cover;
 }
 
 .game {
