@@ -88,3 +88,61 @@ button {
     background-color: #3e3c5f;
 
 }
+
+.counter {
+    font-family: 'Russo One', sans-serif;
+    color: #003366;
+    font-size: 30px;
+    text-align: center;
+    margin: 20px 0;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+#count {
+    color: #FF6600;
+    font-size: 40px;
+    margin-left: 10px;
+}
+
+#game-over-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.4);
+    text-align: center;
+    z-index: 1000;
+    border: 2px solid #5a598a;
+    display: none;
+}
+
+#game-over-popup h2 {
+    font-family: 'Russo One', sans-serif;
+    color: #FF0000;
+    text-shadow: 2px 2px 4px rgba(255, 0, 0, 0.3);
+    margin: 0 0 15px 0;
+}
+
+#final-moves {
+    color: #003366;
+    font-weight: bold;
+    font-size: 24px;
+}
+
+#retry {
+    background-color: #5a598a;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 8px;
+    border: none;
+    margin-top: 15px;
+    transition: transform 0.3s, background-color 0.3s;
+}
+
+#retry:hover {
+    background-color: #FF8533;
+    transform: scale(1.05);
+}
