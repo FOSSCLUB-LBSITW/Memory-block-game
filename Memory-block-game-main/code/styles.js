@@ -127,5 +127,6 @@ function resetGame() {
 const playAgainButton = document.getElementById("play-again");
 playAgainButton.addEventListener("click", resetGame);
 
+document.getElementById("reset").addEventListener("click",resetGame);
 
 });
