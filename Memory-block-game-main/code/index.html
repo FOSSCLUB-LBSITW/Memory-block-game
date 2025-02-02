@@ -5,35 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memory Block Game</title>
     <link rel="stylesheet" href="styles.css">
-    <script defer src="styles.js"></script>
-
-    <!-- Link to Google Fonts for 'Russo One' font -->
     <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
 </head>
 <body>
-        <h1 style="font-family: 'Russo One', sans-serif; font-weight: bold; color: #003366; font-size: 60px; text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.5); margin-top: 10px;">Memory Block Game</h1>
-    
-    <div class="game">
-        <div class="block" data-id="0"></div>
-        <div class="block" data-id="1"></div>
-        <div class="block" data-id="2"></div>
-        <div class="block" data-id="3"></div>
-        <div class="block" data-id="4"></div>
-        <div class="block" data-id="5"></div>
-        <div class="block" data-id="6"></div>
-        <div class="block" data-id="7"></div>
-        <div class="block" data-id="8"></div>
-        <div class="block" data-id="9"></div>
-        <div class="block" data-id="10"></div>
-        <div class="block" data-id="11"></div>
-    </div>
-    <button id="reset">New Game</button>
+    <h1>Memory Block Game</h1>
 
-     <!-- Popup congratulation message -->
-     <div id="congratulation-popup" class="hidden">
+    <div class="level-selection">
+        <button id="easy-level">Easy (6 Images)</button>
+        <button id="medium-level">Medium (10 Images)</button>
+    </div>
+
+    <div class="game" id="game-board"></div>
+
+    
+
+    <div id="congratulation-popup" class="hidden">
         <h2>Congratulations! 🎉</h2>
         <p>You completed the game!</p>
         <button id="play-again">Play Again</button>
-     </div>
+    </div>
+
+    <!-- Music controls -->
+    <div class="music-controls">
+        <button id="toggle-music">Play Music</button>
+        <!-- Add the audio element with your actual music file -->
+        <audio id="background-music" loop>
+            <source src="music/background-music.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+    </div>
+
+    <script src="game.js"></script>
 </body>
 </html>
