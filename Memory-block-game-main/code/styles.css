@@ -43,7 +43,7 @@ body {
     display: block;
 }
 
- congrats
+ 
 /* Pop-up styles */
 #congratulation-popup {
     position: fixed;
@@ -63,6 +63,7 @@ button {
     font-size: 16px;
     cursor: pointer;
     margin-top: 20px;
+}
 
 #reset {
     background-color: #47426d;
