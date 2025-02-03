@@ -5,14 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memory Block Game</title>
     <link rel="stylesheet" href="styles.css">
-    <script defer src="styles.js"></script>
+    <script defer src="script.js"></script>
 
     <!-- Link to Google Fonts for 'Russo One' font -->
     <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
 </head>
 <body>
-        <h1 style="font-family: 'Russo One', sans-serif; font-weight: bold; color: #003366; font-size: 60px; text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.5); margin-top: 10px;">Memory Block Game</h1>
+    <h1 style="font-family: 'Russo One', sans-serif; font-weight: bold; color: #003366; font-size: 60px; text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.5); margin-top: 10px;">Memory Block Game</h1>
     
+    <div class="counter">Timer: <span id="count">0</span></div>
+
     <div class="game">
         <div class="block" data-id="0"></div>
         <div class="block" data-id="1"></div>
@@ -35,5 +37,12 @@
         <p>You completed the game!</p>
         <button id="play-again">Play Again</button>
      </div>
+
+     <!-- Popup Game Over -->
+    <div id="game-over-popup" class="hidden">
+        <h2 style="color: #FF0000;">Game Over! 💀</h2>
+        <p>Time is up!</p>
+        <button id="retry">Try Again</button>
+    </div>
 </body>
 </html>

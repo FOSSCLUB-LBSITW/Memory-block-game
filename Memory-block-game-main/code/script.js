@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let hasFlippedBlock = false;
     let lockBoard = false;
     let firstBlock, secondBlock;
-    
+
 
     blocks.forEach(block => block.addEventListener("click", flipBlock));
 
@@ -71,8 +71,8 @@ document.addEventListener("DOMContentLoaded", () => {
         firstBlock.removeEventListener("click", flipBlock);
         secondBlock.removeEventListener("click", flipBlock);
         matchedPairs++;
-        
-        if(matchedPairs === blocks.length / 2){
+
+        if (matchedPairs === blocks.length / 2) {
             showCongratulations();
         }
 
@@ -96,37 +96,105 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-function showCongratulations() {
-    const popup = document.getElementById("congratulation-popup");
-    popup.style.display = "block";
-}
+    function showCongratulations() {
+        const popup = document.getElementById("congratulation-popup");
+        popup.style.display = "block";
+        stopTimer();
+    }
 
-function resetGame() {
-    // Reset the matched pairs counter
-    matchedPairs = 0;
-    
-    // Hide the popup
-    const popup = document.getElementById("congratulation-popup");
-    popup.style.display = "none";
-    
-    // Reset all blocks
-    blocks.forEach(block => {
-        block.classList.remove("flipped");
-        block.querySelector("img").style.display = "none";
-        block.addEventListener("click", flipBlock);
-    });
-    
-    // Shuffle the images and reassign them to blocks
-    const shuffledImages = shuffle(images);
-    blocks.forEach((block, index) => {
-        block.dataset.image = shuffledImages[index];
-        block.querySelector("img").src = shuffledImages[index];
-    });
-}
+    function resetGame() {
+        // Reset the matched pairs counter
+        matchedPairs = 0;
+        // Reset the timer
+        timer(60)
 
-const playAgainButton = document.getElementById("play-again");
-playAgainButton.addEventListener("click", resetGame);
+        // Hide the popup
+        const popup = document.getElementById("congratulation-popup");
+        popup.style.display = "none";
 
-document.getElementById("reset").addEventListener("click",resetGame);
+        // Reset all blocks
+        blocks.forEach(block => {
+            block.classList.remove("flipped");
+            block.querySelector("img").style.display = "none";
+            block.addEventListener("click", flipBlock);
+        });
+
+        // Shuffle the images and reassign them to blocks
+        const shuffledImages = shuffle(images);
+        blocks.forEach((block, index) => {
+            block.dataset.image = shuffledImages[index];
+            block.querySelector("img").src = shuffledImages[index];
+        });
+    }
+
+    const playAgainButton = document.getElementById("play-again");
+    playAgainButton.addEventListener("click", resetGame);
+
+    document.getElementById("reset").addEventListener("click", resetGame);
+
+
+    let remainingTime;
+    let interval;
+
+    /**
+     * Starts a countdown timer that updates the UI every second.
+     * Displays remaining seconds modulo 60. Shows game-over popup when time expires.
+     * @param {number} seconds - Initial countdown duration in seconds
+     * @example
+     * // Starts 60-second timer showing 0-59 repeatedly in #count element
+     * timer(60);
+     */
+    function timer(seconds) {
+        remainingTime = seconds;
+        interval = setInterval(() => {
+            let seg = remainingTime % 60;
+
+            document.getElementById("count").textContent = seg;
+
+            if (remainingTime === 0) {
+                stopTimer();
+                document.getElementById("game-over-popup").style.display = "block";
+            } else {
+                remainingTime--;
+            }
+        }, 1000);
+    }
+
+    /**
+     * Halts the active countdown timer by clearing the interval.
+     * Companion to timer() function for managing timed game sessions.
+     */
+    function stopTimer() {
+        clearInterval(interval);
+    }
+
+    /**
+     * Resets game state: hides popup, unflips blocks, reshuffles images.
+     * Requires predefined 'blocks' array and 'shuffle' function in scope.
+     * Reattaches click listeners to blocks for game interaction.
+     */
+    function tryAgain() {
+        document.getElementById("game-over-popup").style.display = "none";
+        timer(60)
+
+        blocks.forEach(block => {
+            block.classList.remove("flipped");
+            block.querySelector("img").style.display = "none";
+            block.addEventListener("click", flipBlock);
+        });
+
+        const shuffledImages = shuffle(images);
+
+        blocks.forEach((block, index) => {
+            block.dataset.image = shuffledImages[index];
+            block.querySelector("img").src = shuffledImages[index];
+        });
+    }
+
+    // Event binding for game reset functionality
+    document.getElementById("retry").addEventListener("click", tryAgain)
+
+    // Initial game start with 60-second countdown (displays 0-59 due to modulo operation)
+    timer(60)
 
 });
