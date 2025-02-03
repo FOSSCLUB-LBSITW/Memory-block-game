@@ -133,8 +133,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("reset").addEventListener("click", resetGame);
 
 
-    let tiempoRestante;
-    let intervalo;
+    let remainingTime;
+    let interval;
 
     /**
      * Starts a countdown timer that updates the UI every second.
@@ -145,17 +145,17 @@ document.addEventListener("DOMContentLoaded", () => {
      * timer(60);
      */
     function timer(seconds) {
-        tiempoRestante = seconds;
-        intervalo = setInterval(() => {
-            let seg = tiempoRestante % 60;
+        remainingTime = seconds;
+        interval = setInterval(() => {
+            let seg = remainingTime % 60;
 
             document.getElementById("count").textContent = seg;
 
-            if (tiempoRestante === 0) {
+            if (remainingTime === 0) {
                 stopTimer();
                 document.getElementById("game-over-popup").style.display = "block";
             } else {
-                tiempoRestante--;
+                remainingTime--;
             }
         }, 1000);
     }
@@ -165,7 +165,7 @@ document.addEventListener("DOMContentLoaded", () => {
      * Companion to timer() function for managing timed game sessions.
      */
     function stopTimer() {
-        clearInterval(intervalo);
+        clearInterval(interval);
     }
 
     /**
@@ -195,6 +195,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("retry").addEventListener("click", tryAgain)
 
     // Initial game start with 60-second countdown (displays 0-59 due to modulo operation)
-    timer(1)
+    timer(60)
 
 });
