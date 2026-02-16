@@ -1,7 +1,7 @@
 name: Sync Issue Labels to PR
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, edited, reopened]
 permissions:
     contents: read 
@@ -21,7 +21,8 @@ jobs:
           script: |
             const pr = context.payload.pull_request;
             const body = pr.body || "";
-            const issueNumberMatch = body.match(/#(\d+)/);
+            const issueNumberMatch = body.match(/(?:Fixes|Closes|Resolves)\s+#(\d+)/i);
+
             
             if (!issueNumberMatch) {
               console.log("No linked issue found.");
