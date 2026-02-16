@@ -36,6 +36,8 @@ cd Memory-block-game-main/code
 ```
 -> Open index.html in your browser to play the game.
 
+happy Coding
+
 ## Usage
 **Game Setup** : Open the game in a browser. Blocks are displayed in a grid, each hiding a shuffled image.
 **Playing the Game**: Click on blocks to flip and reveal images. Match pairs of identical images to keep them face-up.
