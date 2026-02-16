@@ -3,6 +3,10 @@ name: Sync Issue Labels to PR
 on:
   pull_request:
     types: [opened, edited, reopened]
+permissions:
+  issues: write
+  pull-requests: write
+
 
 jobs:
   sync-labels:
