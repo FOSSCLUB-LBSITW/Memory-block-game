@@ -1,6 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-
-    // ================= IMAGES =================
     const images = [
         "./images/img1.jpg", "./images/img1.jpg",
         "./images/img2.jpg", "./images/img2.jpg",
@@ -20,7 +18,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let blocks = document.querySelectorAll(".block");
 
-    // ================= GAME STATE =================
     let matchedPairs = 0;
     let hasFlippedBlock = false;
     let lockBoard = false;
@@ -32,7 +29,6 @@ document.addEventListener("DOMContentLoaded", () => {
     let scores = {};
     let gameStarted = false;   // NEW
 
-    // ================= SETUP =================
     function initializeBoard() {
         const shuffledImages = shuffle([...images]);
 
@@ -77,7 +73,6 @@ document.addEventListener("DOMContentLoaded", () => {
             `Player 1's Turn`;
     }
 
-    // ================= GAME LOGIC =================
     function flipBlock() {
 
         // Disable player selection after first move
@@ -189,7 +184,6 @@ document.addEventListener("DOMContentLoaded", () => {
             "none";
     }
 
-    // ================= EVENT LISTENERS =================
     document
         .getElementById("play-again")
         .addEventListener("click", resetGame);
@@ -207,7 +201,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-    // ================= INITIAL LOAD =================
     createScoreboard();
     initializeBoard();
 });
