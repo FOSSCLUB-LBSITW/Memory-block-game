@@ -5,35 +5,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memory Block Game</title>
     <link rel="stylesheet" href="styles.css">
-    <script defer src="styles.js"></script>
+    <script defer src="script.js"></script>
 
-    <!-- Link to Google Fonts for 'Russo One' font -->
     <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
 </head>
 <body>
-        <h1 style="font-family: 'Russo One', sans-serif; font-weight: bold; color: #003366; font-size: 60px; text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.5); margin-top: 10px;">Memory Block Game</h1>
-    
-    <div class="game">
-        <div class="block" data-id="0"></div>
-        <div class="block" data-id="1"></div>
-        <div class="block" data-id="2"></div>
-        <div class="block" data-id="3"></div>
-        <div class="block" data-id="4"></div>
-        <div class="block" data-id="5"></div>
-        <div class="block" data-id="6"></div>
-        <div class="block" data-id="7"></div>
-        <div class="block" data-id="8"></div>
-        <div class="block" data-id="9"></div>
-        <div class="block" data-id="10"></div>
-        <div class="block" data-id="11"></div>
-    </div>
-    <button id="reset">New Game</button>
 
-     <!-- Popup congratulation message -->
-     <div id="congratulation-popup" class="hidden">
-        <h2>Congratulations! 🎉</h2>
-        <p>You completed the game!</p>
-        <button id="play-again">Play Again</button>
-     </div>
+<h1 class="title">Memory Block Game</h1>
+
+<div class="main-container">
+
+    <!-- LEFT: GAME AREA -->
+    <div class="game-section">
+        <div class="game">
+            <div class="block"></div>
+            <div class="block"></div>
+            <div class="block"></div>
+            <div class="block"></div>
+            <div class="block"></div>
+            <div class="block"></div>
+            <div class="block"></div>
+            <div class="block"></div>
+            <div class="block"></div>
+            <div class="block"></div>
+            <div class="block"></div>
+            <div class="block"></div>
+        </div>
+
+        <button id="reset">New Game</button>
+    </div>
+
+    <!-- RIGHT: SCOREBOARD -->
+    <div class="scoreboard">
+        <h2>Game Settings</h2>
+
+        <label>Select Players:</label>
+        <select id="player-count">
+            <option value="2">2 Players</option>
+            <option value="3">3 Players</option>
+            <option value="4">4 Players</option>
+            <option value="5">5 Players</option>
+            <option value="6">6 Players</option>
+        </select>
+
+        <h3 id="turn-indicator">Player 1's Turn</h3>
+
+        <div id="scores-container"></div>
+    </div>
+
+</div>
+
+<div id="congratulation-popup">
+    <h2>Congratulations! 🎉</h2>
+    <p>You completed the game!</p>
+    <button id="play-again">Play Again</button>
+</div>
+
 </body>
 </html>
