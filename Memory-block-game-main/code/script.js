@@ -27,15 +27,17 @@ document.addEventListener("DOMContentLoaded", () => {
     let totalPlayers = 2;
     let currentPlayer = 1;
     let scores = {};
-    let gameStarted = false;   // NEW
+    let gameStarted = false;
+
+    // Tie-breaker variables
+    let tieMode = false;
+    let tiePlayers = [];
 
     function initializeBoard() {
         const shuffledImages = shuffle([...images]);
-
         blocks = document.querySelectorAll(".block");
 
         blocks.forEach((block, index) => {
-
             block.classList.remove("flipped");
             block.innerHTML = "";
 
@@ -75,7 +77,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function flipBlock() {
 
-        // Disable player selection after first move
         if (!gameStarted) {
             gameStarted = true;
             document.getElementById("player-count").disabled = true;
@@ -109,10 +110,15 @@ document.addEventListener("DOMContentLoaded", () => {
         secondBlock.removeEventListener("click", flipBlock);
 
         matchedPairs++;
-
         scores[currentPlayer]++;
         document.getElementById(`score${currentPlayer}`).textContent =
             scores[currentPlayer];
+
+        // If in tie mode → first match wins instantly
+        if (tieMode) {
+            showTieWinner();
+            return;
+        }
 
         if (matchedPairs === images.length / 2) {
             showCongratulations();
@@ -151,29 +157,68 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function showCongratulations() {
-        const popup = document.getElementById("congratulation-popup");
-
         let maxScore = Math.max(...Object.values(scores));
         let winners = [];
 
         for (let player in scores) {
             if (scores[player] === maxScore) {
-                winners.push(`Player ${player}`);
+                winners.push(player);
             }
         }
 
-        let message =
-            winners.length === 1
-                ? `${winners[0]} Wins! 🏆`
-                : `Draw between ${winners.join(", ")} 🤝`;
+        // Single winner
+        if (winners.length === 1) {
+            const popup = document.getElementById("congratulation-popup");
+            popup.querySelector("p").textContent =
+                `Player ${winners[0]} Wins! 🏆`;
+            popup.style.display = "block";
+            return;
+        }
 
-        popup.querySelector("p").textContent = message;
+        // Tie detected
+        tieMode = true;
+        tiePlayers = winners;
+        startTieBreaker();
+    }
+
+    function startTieBreaker() {
+    alert(
+        `Tie detected between Player ${tiePlayers.join(
+            " & "
+        )}! Starting sudden death round!`
+    );
+
+    matchedPairs = 0;
+    totalPlayers = tiePlayers.length;
+
+    let newScores = {};
+    tiePlayers.forEach((player, index) => {
+        newScores[index + 1] = 0;
+    });
+
+    scores = newScores;
+    currentPlayer = 1;
+
+    createScoreboard();
+    initializeBoard();
+}
+
+    function showTieWinner() {
+        const popup = document.getElementById("congratulation-popup");
+
+        popup.querySelector("p").textContent =
+            `Player ${currentPlayer} Wins the Tie-Breaker! 🏆`;
+
         popup.style.display = "block";
+
+        tieMode = false;
     }
 
     function resetGame() {
         matchedPairs = 0;
         gameStarted = false;
+        tieMode = false;
+        tiePlayers = [];
 
         document.getElementById("player-count").disabled = false;
 
