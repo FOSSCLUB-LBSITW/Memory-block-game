@@ -1,189 +1,120 @@
+* {
+  box-sizing: border-box;
+  font-family: 'Fredoka', sans-serif;
+}
+
 body {
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #dbeafe, #93c5fd);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: url("https://wallpaperaccess.com/full/2641048.gif") no-repeat center;
+  background: #fff7ed;
+  text-align: center;
+  margin: 0;
+  padding: 20px;
 }
 
-.title {
-    font-family: 'Russo One', sans-serif;
-    font-size: 48px;
-    color: #003366;
-    margin: 20px 0;
-    text-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+h1 {
+  font-size: 48px;
+  margin-bottom: 10px;
 }
 
-.main-container {
-    display: flex;
-    gap: 40px;
-    align-items: flex-start;
+h1 span {
+  color: #7c3aed;
 }
 
-.game-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.top-controls {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 10px;
 }
 
-.game {
-    display: grid;
-    grid-template-columns: repeat(4, 120px);
-    gap: 15px;
-    margin-bottom: 20px;
+button {
+  background: #fb7185;
+  border: none;
+  padding: 10px 22px;
+  color: white;
+  border-radius: 25px;
+  font-size: 16px;
+  cursor: pointer;
 }
 
-.block {
-    width: 120px;
-    height: 120px;
-    background: #1e3a8a;
-    border-radius: 12px;
-    cursor: pointer;
-    position: relative;
-    transition: transform 0.3s ease;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+button.mode.active {
+  background: #7c3aed;
 }
 
-.block:hover {
-    transform: scale(1.05);
+.stats {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-bottom: 20px;
+  font-size: 18px;
 }
 
-/* Hide images initially */
-.block img {
-    width: 100%;
-    height: 100%;
-    border-radius: 12px;
-    display: none;
-    object-fit: cover;
+.board {
+  display: grid;
+  gap: 15px;
+  justify-content: center;
 }
 
-/* When flipped */
-.block.flipped {
-    background: white;
+/* CARD */
+.card {
+  width: 110px;
+  height: 110px;
+  perspective: 1000px;
+  cursor: pointer;
 }
 
-/* ================= BUTTON ================= */
-#reset {
-    padding: 10px 20px;
-    border: none;
-    background: #2563eb;
-    color: white;
-    font-weight: bold;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: 0.3s;
+.inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transition: transform 0.6s cubic-bezier(.34,1.56,.64,1);
+  transform-style: preserve-3d;
 }
 
-#reset:hover {
-    background: #1d4ed8;
+.card.flipped .inner {
+  transform: rotateY(180deg);
 }
 
-/* ================= SCOREBOARD ================= */
-.scoreboard {
-    width: 260px;
-    background: white;
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+.front, .back {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 42px;
+  backface-visibility: hidden;
 }
 
-.scoreboard h2 {
-    margin-top: 0;
+.front {
+  background: #7c3aed;
+  color: white;
 }
 
-.scoreboard select {
-    width: 100%;
-    padding: 8px;
-    margin: 10px 0 20px 0;
+.back {
+  background: white;
+  transform: rotateY(180deg);
 }
 
-#scores-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+.card.matched .inner {
+  transform: rotateY(180deg) scale(1.05);
 }
 
-.score-card {
-    background: #1e40af;
-    color: white;
-    padding: 10px;
-    border-radius: 8px;
-    font-weight: bold;
+/* MODAL */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-#congratulation-popup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 0 25px rgba(0,0,0,0.3);
-    display: none;
-    text-align: center;
+.hidden {
+  display: none;
 }
 
-#congratulation-popup button {
-    margin-top: 15px;
-    padding: 8px 20px;
-    border: none;
-    background: #16a34a;
-    color: white;
-    font-weight: bold;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-#congratulation-popup button:hover {
-    background: #15803d;
-}
-
-/* ================= RESPONSIVE DESIGN ================= */
-
-/* Tablets */
-@media (max-width: 992px) {
-    .main-container {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .scoreboard {
-        width: 90%;
-        max-width: 400px;
-    }
-}
-
-/* Mobile Screens */
-@media (max-width: 600px) {
-
-    .title {
-        font-size: 32px;
-        text-align: center;
-    }
-
-    .game {
-        grid-template-columns: repeat(4, 70px);
-        gap: 10px;
-    }
-
-    .block {
-        width: 70px;
-        height: 70px;
-    }
-
-    .scoreboard {
-        width: 95%;
-        margin-top: 20px;
-    }
-
-    #congratulation-popup {
-        width: 90%;
-        padding: 20px;
-    }
+.modal-box {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
 }
