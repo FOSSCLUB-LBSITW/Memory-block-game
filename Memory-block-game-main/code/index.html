@@ -1,63 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Memory Block Game</title>
-    <link rel="stylesheet" href="styles.css">
-    <script defer src="script.js"></script>
+<meta charset="UTF-8">
+<title>Memory Blocks</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
 
-<h1 class="title">Memory Block Game</h1>
+<h1>Memory <span>Blocks</span></h1>
 
-<div class="main-container">
-
-    <div class="game-section">
-        <div class="game">
-            <div class="block"></div>
-            <div class="block"></div>
-            <div class="block"></div>
-            <div class="block"></div>
-            <div class="block"></div>
-            <div class="block"></div>
-            <div class="block"></div>
-            <div class="block"></div>
-            <div class="block"></div>
-            <div class="block"></div>
-            <div class="block"></div>
-            <div class="block"></div>
-        </div>
-
-        <button id="reset">New Game</button>
-    </div>
-
-    <div class="scoreboard">
-        <h2>Game Settings</h2>
-
-        <label>Select Players:</label>
-        <select id="player-count">
-            <option value="2">2 Players</option>
-            <option value="3">3 Players</option>
-            <option value="4">4 Players</option>
-            <option value="5">5 Players</option>
-            <option value="6">6 Players</option>
-        </select>
-
-        <h3 id="turn-indicator">Player 1's Turn</h3>
-
-        <div id="scores-container"></div>
-    </div>
-
+<div class="top-controls">
+  <button class="mode active" data-size="4">4×4</button>
+  <button class="mode" data-size="6">4×6</button>
+  <button id="newGame">New Game</button>
 </div>
 
-<div id="congratulation-popup">
-    <h2>Congratulations! 🎉</h2>
-    <p>You completed the game!</p>
-    <button id="play-again">Play Again</button>
+<div class="stats">
+  <div>Moves <span id="moves">0</span></div>
+  <div>Time <span id="time">0:00</span></div>
+  <div>Pairs <span id="pairs">0</span></div>
 </div>
 
+<div id="board" class="board"></div>
+
+<!-- WIN MODAL -->
+<div id="winModal" class="modal hidden">
+  <div class="modal-box">
+    <h2>You Win! 🎉</h2>
+    <p id="finalStats"></p>
+    <button id="playAgain">Play Again</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
