@@ -32,6 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Tie-breaker variables
     let tieMode = false;
     let tiePlayers = [];
+    let originalTiePlayers = [];
 
     function initializeBoard() {
         const shuffledImages = shuffle([...images]);
@@ -155,8 +156,14 @@ document.addEventListener("DOMContentLoaded", () => {
         firstBlock = null;
         secondBlock = null;
     }
-
+    function disableBoardInteraction() {
+    lockBoard = true;
+    blocks.forEach(block => {
+        block.removeEventListener("click", flipBlock);
+        });
+    }
     function showCongratulations() {
+        disableBoardInteraction();
         let maxScore = Math.max(...Object.values(scores));
         let winners = [];
 
@@ -182,6 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function startTieBreaker() {
+        originalTiePlayers = [...tiePlayers];
     alert(
         `Tie detected between Player ${tiePlayers.join(
             " & "
@@ -204,10 +212,11 @@ document.addEventListener("DOMContentLoaded", () => {
 }
 
     function showTieWinner() {
+        disableBoardInteraction();
         const popup = document.getElementById("congratulation-popup");
 
         popup.querySelector("p").textContent =
-            `Player ${currentPlayer} Wins the Tie-Breaker! 🏆`;
+            `Player ${originalTiePlayers[currentPlayer - 1]} Wins the Tie-Breaker! 🏆`
 
         popup.style.display = "block";
 
