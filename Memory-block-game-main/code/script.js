@@ -1,24 +1,28 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const images = [
-        "./images/img1.jpg", "./images/img1.jpg",
-        "./images/img2.jpg", "./images/img2.jpg",
-        "./images/img3.jpg", "./images/img3.jpg",
-        "./images/img4.jpg", "./images/img4.jpg",
-        "./images/img5.jpg", "./images/img5.jpg",
-        "./images/img6.jpg", "./images/img6.jpg",
+    const REAL_IMAGES = 18;
+
+    // Emoji pool (for testing)
+    const EMOJI_POOL = [
+        { emoji: "🦊", color: "#f97316" }, { emoji: "🐬", color: "#0ea5e9" },
+        { emoji: "🌸", color: "#ec4899" }, { emoji: "🍀", color: "#22c55e" },
+        { emoji: "⚡", color: "#eab308" }, { emoji: "🎸", color: "#8b5cf6" },
+        { emoji: "🔥", color: "#ef4444" }, { emoji: "🌊", color: "#3b82f6" },
+        { emoji: "🎯", color: "#14b8a6" }, { emoji: "🏆", color: "#f59e0b" },
+        { emoji: "🎲", color: "#6366f1" }, { emoji: "🍉", color: "#10b981" },
+        { emoji: "🚀", color: "#64748b" }, { emoji: "🦋", color: "#a855f7" },
+        { emoji: "🐉", color: "#dc2626" }, { emoji: "🌙", color: "#1d4ed8" },
+        { emoji: "🎪", color: "#db2777" }, { emoji: "🦄", color: "#9333ea" },
+        { emoji: "🌴", color: "#15803d" }, { emoji: "🎭", color: "#b45309" },
+        { emoji: "🍕", color: "#c2410c" }, { emoji: "🎠", color: "#0369a1" },
+        { emoji: "🦁", color: "#92400e" }, { emoji: "🌈", color: "#7c3aed" },
+        { emoji: "🐙", color: "#be185d" }, { emoji: "🎆", color: "#1e40af" },
     ];
 
-    function shuffle(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
-    }
-
-    let blocks = document.querySelectorAll(".block");
+    let images = [];
+    let blocks = [];
 
     let matchedPairs = 0;
+    let totalPairs = 0;
     let hasFlippedBlock = false;
     let lockBoard = false;
     let firstBlock = null;
@@ -34,21 +38,91 @@ document.addEventListener("DOMContentLoaded", () => {
     let tiePlayers = [];
     let originalTiePlayers = [];
 
+    // ── Grid size helpers ────────────────────────────────────────────────────
+    function getGridDimensions() {
+        const rows = parseInt(document.getElementById("rows-select").value);
+        const cols = parseInt(document.getElementById("cols-select").value);
+        return { rows, cols };
+    }
+
+    function isValidGrid(rows, cols) {
+        return (rows * cols) % 2 === 0;   // need even total tiles
+    }
+
+    /** Compute a block size (px) so the grid fits nicely in the viewport. */
+    function computeBlockSize(cols) {
+        const maxFromViewport = Math.floor((window.innerWidth * 0.60) / cols) - 15;
+        return Math.min(120, Math.max(50, maxFromViewport));
+    }
+
+    // ── Dynamic grid generation ──────────────────────────────────────────────
+    function generateGrid(rows, cols) {
+        const gameDiv = document.getElementById("game-grid");
+        gameDiv.innerHTML = "";
+
+        const blockSize = computeBlockSize(cols);
+
+        // Set CSS custom properties for columns and block size
+        gameDiv.style.setProperty("--cols", cols);
+        gameDiv.style.setProperty("--block-size", `${blockSize}px`);
+
+        for (let i = 0; i < rows * cols; i++) {
+            const block = document.createElement("div");
+            block.classList.add("block");
+            gameDiv.appendChild(block);
+        }
+    }
+
+    // ── Shuffle ──────────────────────────────────────────────────────────────
+    function shuffle(array) {
+        const arr = [...array];
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    // ── Board initialisation ─────────────────────────────────────────────────
     function initializeBoard() {
-        const shuffledImages = shuffle([...images]);
+        const { rows, cols } = getGridDimensions();
+        const totalTiles = rows * cols;
+        totalPairs = totalTiles / 2;
+
+        // Build a shuffled array of pair IDs (1..totalPairs, each appearing twice)
+        const pool = Array.from({ length: totalPairs }, (_, i) => i + 1);
+        const shuffledIds = shuffle([...pool, ...pool]);
+
+        generateGrid(rows, cols);
+
         blocks = document.querySelectorAll(".block");
 
         blocks.forEach((block, index) => {
+            const pairId = shuffledIds[index];
             block.classList.remove("flipped");
             block.innerHTML = "";
+            block.dataset.pairId = pairId;
 
-            const img = document.createElement("img");
-            img.src = shuffledImages[index];
-            img.alt = "Memory Image";
-            img.style.display = "none";
-
-            block.appendChild(img);
-            block.dataset.image = shuffledImages[index];
+            if (pairId <= REAL_IMAGES) {
+                // Real image card
+                const img = document.createElement("img");
+                img.src = `./images/img${pairId}.jpg`;
+                img.alt = "Memory Image";
+                img.style.display = "none";
+                block.appendChild(img);
+                block.dataset.cardType = "image";
+            } else {
+                // Emoji / colour placeholder card
+                const eIdx = (pairId - REAL_IMAGES - 1) % EMOJI_POOL.length;
+                const { emoji, color } = EMOJI_POOL[eIdx];
+                const face = document.createElement("div");
+                face.classList.add("emoji-face");
+                face.textContent = emoji;
+                face.style.backgroundColor = color;
+                face.style.display = "none";
+                block.appendChild(face);
+                block.dataset.cardType = "emoji";
+            }
 
             block.removeEventListener("click", flipBlock);
             block.addEventListener("click", flipBlock);
@@ -57,6 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
         resetBoard();
     }
 
+    // ── Scoreboard ───────────────────────────────────────────────────────────
     function createScoreboard() {
         const container = document.getElementById("scores-container");
         container.innerHTML = "";
@@ -72,22 +147,34 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         currentPlayer = 1;
-        document.getElementById("turn-indicator").textContent =
-            `Player 1's Turn`;
+        document.getElementById("turn-indicator").textContent = `Player 1's Turn`;
     }
 
-    function flipBlock() {
+    // ── Grid controls: lock / unlock ─────────────────────────────────────────
+    function lockGridControls() {
+        document.getElementById("rows-select").disabled = true;
+        document.getElementById("cols-select").disabled = true;
+    }
 
+    function unlockGridControls() {
+        document.getElementById("rows-select").disabled = false;
+        document.getElementById("cols-select").disabled = false;
+    }
+
+    // ── Flip logic ───────────────────────────────────────────────────────────
+    function flipBlock() {
         if (!gameStarted) {
             gameStarted = true;
             document.getElementById("player-count").disabled = true;
+            lockGridControls();
         }
 
         if (lockBoard) return;
         if (this === firstBlock) return;
 
         this.classList.add("flipped");
-        this.querySelector("img").style.display = "block";
+        const face = this.querySelector("img, .emoji-face");
+        if (face) face.style.display = face.classList.contains("emoji-face") ? "flex" : "block";
 
         if (!hasFlippedBlock) {
             hasFlippedBlock = true;
@@ -100,9 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function checkForMatch() {
-        const isMatch =
-            firstBlock.dataset.image === secondBlock.dataset.image;
-
+        const isMatch = firstBlock.dataset.pairId === secondBlock.dataset.pairId;
         isMatch ? disableBlocks() : unflipBlocks();
     }
 
@@ -121,7 +206,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        if (matchedPairs === images.length / 2) {
+        if (matchedPairs === totalPairs) {
             showCongratulations();
         }
 
@@ -133,10 +218,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         setTimeout(() => {
             firstBlock.classList.remove("flipped");
-            firstBlock.querySelector("img").style.display = "none";
+            const f1 = firstBlock.querySelector("img, .emoji-face");
+            if (f1) f1.style.display = "none";
 
             secondBlock.classList.remove("flipped");
-            secondBlock.querySelector("img").style.display = "none";
+            const f2 = secondBlock.querySelector("img, .emoji-face");
+            if (f2) f2.style.display = "none";
 
             currentPlayer++;
             if (currentPlayer > totalPlayers) {
@@ -156,12 +243,15 @@ document.addEventListener("DOMContentLoaded", () => {
         firstBlock = null;
         secondBlock = null;
     }
+
     function disableBoardInteraction() {
-    lockBoard = true;
-    blocks.forEach(block => {
-        block.removeEventListener("click", flipBlock);
+        lockBoard = true;
+        blocks.forEach(block => {
+            block.removeEventListener("click", flipBlock);
         });
     }
+
+    // ── End-of-game ──────────────────────────────────────────────────────────
     function showCongratulations() {
         disableBoardInteraction();
         let maxScore = Math.max(...Object.values(scores));
@@ -223,6 +313,7 @@ document.addEventListener("DOMContentLoaded", () => {
         tieMode = false;
     }
 
+    // ── Reset / New Game ─────────────────────────────────────────────────────
     function resetGame() {
         matchedPairs = 0;
         gameStarted = false;
@@ -230,31 +321,52 @@ document.addEventListener("DOMContentLoaded", () => {
         tiePlayers = [];
 
         document.getElementById("player-count").disabled = false;
+        unlockGridControls();
+        clearGridHintError();
 
         createScoreboard();
         initializeBoard();
 
-        document.getElementById("congratulation-popup").style.display =
-            "none";
+        document.getElementById("congratulation-popup").style.display = "none";
     }
 
-    document
-        .getElementById("play-again")
-        .addEventListener("click", resetGame);
+    // ── Grid size validation hint ────────────────────────────────────────────
+    function clearGridHintError() {
+        const hint = document.getElementById("grid-hint");
+        hint.classList.remove("error");
+        hint.textContent = "At least one of rows or columns must be even.";
+    }
 
-    document
-        .getElementById("reset")
-        .addEventListener("click", resetGame);
+    function validateAndApplyGrid() {
+        if (gameStarted) return;   // can't change mid-game
+        const { rows, cols } = getGridDimensions();
+        const hint = document.getElementById("grid-hint");
 
-    document
-        .getElementById("player-count")
-        .addEventListener("change", function () {
-            if (!gameStarted) {
-                totalPlayers = parseInt(this.value);
-                resetGame();
-            }
-        });
+        if (!isValidGrid(rows, cols)) {
+            hint.classList.add("error");
+            hint.textContent = `⚠ ${rows}×${cols} = ${rows * cols} tiles (odd). Please make at least one dimension even.`;
+        } else {
+            clearGridHintError();
+            // Live-preview the new grid without resetting scores / game state
+            resetGame();
+        }
+    }
 
+    // ── Event Listeners ──────────────────────────────────────────────────────
+    document.getElementById("play-again").addEventListener("click", resetGame);
+    document.getElementById("reset").addEventListener("click", resetGame);
+
+    document.getElementById("player-count").addEventListener("change", function () {
+        if (!gameStarted) {
+            totalPlayers = parseInt(this.value);
+            resetGame();
+        }
+    });
+
+    document.getElementById("rows-select").addEventListener("change", validateAndApplyGrid);
+    document.getElementById("cols-select").addEventListener("change", validateAndApplyGrid);
+
+    // ── Bootstrap ────────────────────────────────────────────────────────────
     createScoreboard();
     initializeBoard();
 });
