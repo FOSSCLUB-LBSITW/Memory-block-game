@@ -155,8 +155,14 @@ document.addEventListener("DOMContentLoaded", () => {
         firstBlock = null;
         secondBlock = null;
     }
-
+    function disableBoardInteraction() {
+    lockBoard = true;
+    blocks.forEach(block => {
+        block.removeEventListener("click", flipBlock);
+        });
+    }
     function showCongratulations() {
+        disableBoardInteraction();
         let maxScore = Math.max(...Object.values(scores));
         let winners = [];
 
@@ -204,6 +210,7 @@ document.addEventListener("DOMContentLoaded", () => {
 }
 
     function showTieWinner() {
+        disableBoardInteraction();
         const popup = document.getElementById("congratulation-popup");
 
         popup.querySelector("p").textContent =
