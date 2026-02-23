@@ -14,7 +14,7 @@ body {
     font-size: 48px;
     color: #003366;
     margin: 20px 0;
-    text-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 .main-container {
@@ -29,16 +29,18 @@ body {
     align-items: center;
 }
 
+/* ── Dynamic game grid ──────────────────────────────────────────── */
 .game {
     display: grid;
-    grid-template-columns: repeat(4, 120px);
+    /* --cols and --block-size are set by JS */
+    grid-template-columns: repeat(var(--cols, 4), var(--block-size, 120px));
     gap: 15px;
     margin-bottom: 20px;
 }
 
 .block {
-    width: 120px;
-    height: 120px;
+    width: var(--block-size, 120px);
+    height: var(--block-size, 120px);
     background: #1e3a8a;
     border-radius: 12px;
     cursor: pointer;
@@ -67,7 +69,20 @@ body {
     background: white;
 }
 
-/* ================= BUTTON ================= */
+/* Emoji / colour placeholder card face */
+.emoji-face {
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    display: none;
+    /* JS sets display:flex when flipped */
+    justify-content: center;
+    align-items: center;
+    font-size: calc(var(--block-size, 120px) * 0.45);
+    line-height: 1;
+}
+
+/* ── Buttons ──────────────────────────────────────────────────── */
 #reset {
     padding: 10px 20px;
     border: none;
@@ -85,6 +100,13 @@ body {
 
 /* ================= SCOREBOARD ================= */
 /* ================= IMPROVED PLAYER SCORES & TURN INDICATOR ================= */
+.scoreboard {
+    width: 260px;
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+}
 
 /* Remove or comment out the Game Settings heading */
 .scoreboard h2 {
@@ -108,6 +130,67 @@ body {
 }
 
 /* Enhanced Score Cards */
+/* ── Grid size controls ───────────────────────────────────────── */
+.setting-group {
+    margin-bottom: 16px;
+}
+
+.setting-group>label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.grid-inputs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.grid-input-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    color: #555;
+}
+
+.grid-input-item select {
+    width: 72px;
+    padding: 6px;
+    margin: 0;
+    /* override the general .scoreboard select margin */
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.grid-x {
+    font-size: 20px;
+    font-weight: bold;
+    color: #1e3a8a;
+    padding-top: 16px;
+    /* align with select boxes */
+}
+
+.grid-hint {
+    font-size: 11px;
+    color: #777;
+    margin: 0;
+}
+
+.grid-hint.error {
+    color: #dc2626;
+    font-weight: bold;
+}
+
+/* disabled selects – visual cue */
+select:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
 #scores-container {
     display: flex;
     flex-direction: column;
@@ -163,13 +246,6 @@ body {
     color: white;
 }
 
-/* Current player highlight - Simple but effective */
-.score-card.current-turn {
-    border: 3px solid #fbbf24;
-    transform: scale(1.02);
-    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4);
-}
-
 /* Score value styling */
 .score-card span:last-child {
     background: rgba(255, 255, 255, 0.2);
@@ -192,6 +268,7 @@ body {
     font-weight: bold;
     cursor: pointer;
 }
+/* ── Congratulation popup ─────────────────────────────────────── */
 #congratulation-popup {
     position: fixed;
     top: 50%;
@@ -200,7 +277,7 @@ body {
     background: white;
     padding: 30px;
     border-radius: 15px;
-    box-shadow: 0 0 25px rgba(0,0,0,0.3);
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
     display: none;
     text-align: center;
 }
@@ -220,7 +297,7 @@ body {
     background: #15803d;
 }
 
-/* ================= RESPONSIVE DESIGN ================= */
+/* ── Responsive Design ───────────────────────────────────────── */
 
 /* Tablets */
 @media (max-width: 992px) {
@@ -244,13 +321,7 @@ body {
     }
 
     .game {
-        grid-template-columns: repeat(4, 70px);
-        gap: 10px;
-    }
-
-    .block {
-        width: 70px;
-        height: 70px;
+        gap: 8px;
     }
 
     .scoreboard {

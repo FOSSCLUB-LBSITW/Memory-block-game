@@ -16,19 +16,8 @@
 <div class="main-container">
 
     <div class="game-section">
-        <div class="game">
-            <div class="block"></div>
-            <div class="block"></div>
-            <div class="block"></div>
-            <div class="block"></div>
-            <div class="block"></div>
-            <div class="block"></div>
-            <div class="block"></div>
-            <div class="block"></div>
-            <div class="block"></div>
-            <div class="block"></div>
-            <div class="block"></div>
-            <div class="block"></div>
+        <div class="game" id="game-grid">
+            <!-- Blocks are generated dynamically by JS -->
         </div>
 
         <button id="reset">New Game</button>
@@ -36,6 +25,33 @@
 
     <div class="scoreboard">
         <h2>Game Settings</h2>
+        <div class="setting-group">
+            <label>Grid Size:</label>
+            <div class="grid-inputs">
+                <div class="grid-input-item">
+                    <span>Rows</span>
+                    <select id="rows-select">
+                        <option value="2">2</option>
+                        <option value="3" selected>3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                    </select>
+                </div>
+                <span class="grid-x">x</span>
+                <div class="grid-input-item">
+                    <span>Cols</span>
+                    <select id="cols-select">
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4" selected>4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                    </select>
+                </div>
+            </div>
+            <p class="grid-hint" id="grid-hint">At least one of rows or columns must be even.</p>
+        </div>
 
         <label>Select Players:</label>
         <select id="player-count">
