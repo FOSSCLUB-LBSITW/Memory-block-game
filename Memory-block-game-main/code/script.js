@@ -10,12 +10,37 @@ document.addEventListener("DOMContentLoaded", () => {
         { emoji: "🎲", color: "#6366f1" }, { emoji: "🍉", color: "#10b981" },
         { emoji: "🚀", color: "#64748b" }, { emoji: "🦋", color: "#a855f7" },
         { emoji: "🐉", color: "#dc2626" }, { emoji: "🌙", color: "#1d4ed8" },
-        { emoji: "🎪", color: "#db2777" }, { emoji: "🦄", color: "#9333ea" },
-        { emoji: "🌴", color: "#15803d" }, { emoji: "🎭", color: "#b45309" },
-        { emoji: "🍕", color: "#c2410c" }, { emoji: "🎠", color: "#0369a1" },
-        { emoji: "🦁", color: "#92400e" }, { emoji: "🌈", color: "#7c3aed" },
-        { emoji: "🐙", color: "#be185d" }, { emoji: "🎆", color: "#1e40af" },
+        { emoji: "🎪", color: "#db2777" }, { emoji: "🦄", color: "#9333ea" }
     ];
+
+    /* ── Sound setup (NEW) ───────────────────── */
+    const flipSound = document.getElementById("flip-sound");
+    const matchSound = document.getElementById("match-sound");
+    const wrongSound = document.getElementById("wrong-sound");
+
+    const muteBtn = document.getElementById("mute-btn");
+    const volumeSlider = document.getElementById("volume-slider");
+
+    let isMuted = false;
+
+    volumeSlider.addEventListener("input", () => {
+        const volume = volumeSlider.value;
+        [flipSound, matchSound, wrongSound].forEach(s => s.volume = volume);
+    });
+
+    muteBtn.addEventListener("click", () => {
+        isMuted = !isMuted;
+        [flipSound, matchSound, wrongSound].forEach(s => s.muted = isMuted);
+        muteBtn.textContent = isMuted ? "🔇 Unmute" : "🔊 Mute";
+    });
+
+    function playSound(sound) {
+        if (!isMuted) {
+            sound.currentTime = 0;
+            sound.play();
+        }
+    }
+    /* ───────────────────────────────────────── */
 
     let blocks = [];
     let matchedPairs = 0;
@@ -30,9 +55,11 @@ document.addEventListener("DOMContentLoaded", () => {
     let scores = {};
     let gameStarted = false;
 
-    /* ── Difficulty ───────────────────────────── */
     let difficulty = "medium";
     let unflipDelay = 1000;
+
+    const rowsSelect = document.getElementById("rows-select");
+    const colsSelect = document.getElementById("cols-select");
 
     function applyDifficulty(level) {
         difficulty = level;
@@ -42,30 +69,23 @@ document.addEventListener("DOMContentLoaded", () => {
             colsSelect.value = 4;
             unflipDelay = 1200;
         }
-
         if (level === "medium") {
             rowsSelect.value = 3;
             colsSelect.value = 4;
             unflipDelay = 1000;
         }
-
         if (level === "hard") {
             rowsSelect.value = 4;
             colsSelect.value = 6;
             unflipDelay = 700;
         }
-
         resetGame();
     }
-
-    /* ── Grid helpers ─────────────────────────── */
-    const rowsSelect = document.getElementById("rows-select");
-    const colsSelect = document.getElementById("cols-select");
 
     function getGridDimensions() {
         return {
             rows: parseInt(rowsSelect.value),
-            cols: parseInt(colsSelect.value),
+            cols: parseInt(colsSelect.value)
         };
     }
 
@@ -114,20 +134,13 @@ document.addEventListener("DOMContentLoaded", () => {
             block.innerHTML = "";
             block.dataset.pairId = pairId;
 
-            if (pairId <= REAL_IMAGES) {
-                const img = document.createElement("img");
-                img.src = `./images/img${pairId}.jpg`;
-                img.style.display = "none";
-                block.appendChild(img);
-            } else {
-                const e = EMOJI_POOL[(pairId - REAL_IMAGES - 1) % EMOJI_POOL.length];
-                const face = document.createElement("div");
-                face.className = "emoji-face";
-                face.textContent = e.emoji;
-                face.style.backgroundColor = e.color;
-                face.style.display = "none";
-                block.appendChild(face);
-            }
+            const e = EMOJI_POOL[(pairId - 1) % EMOJI_POOL.length];
+            const face = document.createElement("div");
+            face.className = "emoji-face";
+            face.textContent = e.emoji;
+            face.style.backgroundColor = e.color;
+            face.style.display = "none";
+            block.appendChild(face);
 
             block.addEventListener("click", flipBlock);
         });
@@ -161,8 +174,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         this.classList.add("flipped");
-        const face = this.querySelector("img, .emoji-face");
-        face.style.display = face.classList.contains("emoji-face") ? "flex" : "block";
+        this.querySelector(".emoji-face").style.display = "flex";
+        playSound(flipSound);
 
         if (!hasFlippedBlock) {
             hasFlippedBlock = true;
@@ -188,6 +201,8 @@ document.addEventListener("DOMContentLoaded", () => {
         scores[currentPlayer]++;
         document.getElementById(`score${currentPlayer}`).textContent = scores[currentPlayer];
 
+        playSound(matchSound);
+
         if (matchedPairs === totalPairs) {
             document.getElementById("congratulation-popup").style.display = "block";
             gameOver = true;
@@ -198,11 +213,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function unflipBlocks() {
         lockBoard = true;
+        playSound(wrongSound);
 
         setTimeout(() => {
             [firstBlock, secondBlock].forEach(block => {
                 block.classList.remove("flipped");
-                block.querySelector("img, .emoji-face").style.display = "none";
+                block.querySelector(".emoji-face").style.display = "none";
             });
 
             currentPlayer = (currentPlayer % totalPlayers) + 1;
@@ -232,7 +248,6 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("congratulation-popup").style.display = "none";
     }
 
-    /* ── Events ───────────────────────────────── */
     document.getElementById("reset").addEventListener("click", resetGame);
     document.getElementById("play-again").addEventListener("click", resetGame);
 
@@ -247,7 +262,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!gameStarted) applyDifficulty(e.target.value);
     });
 
-    /* ── Start ────────────────────────────────── */
     createScoreboard();
     initializeBoard();
 });

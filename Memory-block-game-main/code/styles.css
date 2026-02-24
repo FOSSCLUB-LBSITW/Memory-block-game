@@ -258,3 +258,21 @@ select:disabled {
         padding: 20px;
     }
 }
+/* ── Sound controls ───────────────────────── */
+#mute-btn {
+    padding: 6px 12px;
+    margin-bottom: 8px;
+    border: none;
+    background: #2563eb;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+#mute-btn:hover {
+    background: #1d4ed8;
+}
+
+#volume-slider {
+    width: 100%;
+}
