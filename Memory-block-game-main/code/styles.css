@@ -1,18 +1,27 @@
+:root {
+    --accent: #1e3a8a;
+    --accent-dark: #172554;
+    --title-color: #1e3a8a;
+}
+
 body {
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #dbeafe, #93c5fd);
+    background-color: #dbeafe;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: url("https://wallpaperaccess.com/full/2641048.gif") no-repeat center;
 }
 
 .title {
     font-family: 'Russo One', sans-serif;
     font-size: 48px;
-    color: #003366;
+    color: var(--title-color);
     margin: 20px 0;
     text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
 }
@@ -41,11 +50,11 @@ body {
 .block {
     width: var(--block-size, 120px);
     height: var(--block-size, 120px);
-    background: #1e3a8a;
+    background: var(--accent, #1e3a8a);
     border-radius: 12px;
     cursor: pointer;
     position: relative;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, background 0.4s ease;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -86,16 +95,16 @@ body {
 #reset {
     padding: 10px 20px;
     border: none;
-    background: #2563eb;
+    background: var(--accent, #2563eb);
     color: white;
     font-weight: bold;
     border-radius: 8px;
     cursor: pointer;
-    transition: 0.3s;
+    transition: background 0.3s;
 }
 
 #reset:hover {
-    background: #1d4ed8;
+    background: var(--accent-dark, #1d4ed8);
 }
 
 /* ================= SCOREBOARD ================= */
@@ -115,7 +124,7 @@ body {
 
 /* Clean Turn Indicator */
 #turn-indicator {
-    background: linear-gradient(135deg, #2563eb, #1e3a8a);
+    background: linear-gradient(135deg, var(--accent, #2563eb), var(--accent-dark, #1e3a8a));
     color: white;
     padding: 12px 20px;
     border-radius: 8px;
@@ -127,6 +136,7 @@ body {
     border-left: 5px solid #fbbf24;
     text-transform: uppercase;
     letter-spacing: 1px;
+    transition: background 0.4s ease;
 }
 
 /* Enhanced Score Cards */

@@ -1,7 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const REAL_IMAGES = 18;
+    // ── Theme state ──────────────────────────────────────────────────────────
+    let themes = [];
+    let activeTheme = null;
 
-    // Emoji pool (for testing)
+    // Emoji pool — fallback when theme has fewer characters than needed
     const EMOJI_POOL = [
         { emoji: "🦊", color: "#f97316" }, { emoji: "🐬", color: "#0ea5e9" },
         { emoji: "🌸", color: "#ec4899" }, { emoji: "🍀", color: "#22c55e" },
@@ -18,7 +20,6 @@ document.addEventListener("DOMContentLoaded", () => {
         { emoji: "🐙", color: "#be185d" }, { emoji: "🎆", color: "#1e40af" },
     ];
 
-    let images = [];
     let blocks = [];
 
     let matchedPairs = 0;
@@ -37,6 +38,74 @@ document.addEventListener("DOMContentLoaded", () => {
     let tieMode = false;
     let tiePlayers = [];
     let originalTiePlayers = [];
+
+    // ── Theme helpers ────────────────────────────────────────────────────────
+
+    /** Load themes.json, then fetch each theme's manifest.json to discover images. */
+    async function loadThemes() {
+        try {
+            const res = await fetch("./themes.json");
+            themes = await res.json();
+        } catch (e) {
+            console.warn("Could not load themes.json — using emoji fallback.", e);
+            themes = [];
+        }
+
+        // For each theme, fetch its folder/manifest.json to get the image list
+        await Promise.all(themes.map(async (theme) => {
+            try {
+                const res = await fetch(`${theme.folder}/manifest.json`);
+                const filenames = await res.json();
+                theme.characters = filenames.map(f => ({
+                    image: `${theme.folder}/${f}`
+                }));
+            } catch (e) {
+                console.warn(`Could not load manifest for theme "${theme.id}":`, e);
+                theme.characters = [];
+            }
+        }));
+
+        const sel = document.getElementById("theme-select");
+        sel.innerHTML = "";
+
+        if (themes.length === 0) {
+            sel.innerHTML = "<option value=''>No themes found</option>";
+            activeTheme = null;
+            return;
+        }
+
+        themes.forEach((theme) => {
+            const opt = document.createElement("option");
+            opt.value = theme.id;
+            opt.textContent = theme.name;
+            sel.appendChild(opt);
+        });
+
+        // Apply the first theme by default
+        applyTheme(themes[0]);
+        initializeBoard();
+    }
+
+    /** Apply visual theme (background, CSS accent colour) and store character list. */
+    function applyTheme(theme) {
+        activeTheme = theme;
+
+        // Background
+        document.body.style.backgroundImage = `url("${theme.backgroundUrl}")`;
+        document.body.style.backgroundSize   = "cover";
+        document.body.style.backgroundRepeat = "no-repeat";
+        document.body.style.backgroundPosition = "center";    
+
+        // CSS accent colour variables used by cards, buttons, indicator
+        const root = document.documentElement;
+        root.style.setProperty("--accent",      theme.accentColor     || "#1e3a8a");
+        root.style.setProperty("--accent-dark", theme.accentColorDark || "#172554");
+        root.style.setProperty("--title-color", theme.titleColor      || "#1e3a8a");
+    }
+
+    /** Lock / unlock the theme dropdown alongside other pre-game controls. */
+    function lockThemeControl()   { document.getElementById("theme-select").disabled = true;  }
+    function unlockThemeControl() { document.getElementById("theme-select").disabled = false; }
 
     // ── Grid size helpers ────────────────────────────────────────────────────
     function getGridDimensions() {
@@ -89,40 +158,52 @@ document.addEventListener("DOMContentLoaded", () => {
         const totalTiles = rows * cols;
         totalPairs = totalTiles / 2;
 
-        // Build a shuffled array of pair IDs (1..totalPairs, each appearing twice)
-        const pool = Array.from({ length: totalPairs }, (_, i) => i + 1);
-        const shuffledIds = shuffle([...pool, ...pool]);
+        // Pick `totalPairs` characters from the active theme (shuffled),
+        // cycling with emoji fallback when the theme doesn't have enough.
+        const themeChars = activeTheme ? shuffle([...activeTheme.characters]) : [];
+
+        // Build card-face descriptors indexed 1..totalPairs
+        const cardFaces = [];
+        for (let i = 0; i < totalPairs; i++) {
+            if (i < themeChars.length) {
+                cardFaces.push({ type: "image", src: themeChars[i].image, name: themeChars[i].name });
+            } else {
+                const eIdx = (i - themeChars.length) % EMOJI_POOL.length;
+                cardFaces.push({ type: "emoji", ...EMOJI_POOL[eIdx] });
+            }
+        }
+
+        // Each face appears twice, shuffle positions
+        const shuffledFaces = shuffle([...cardFaces, ...cardFaces]);
 
         generateGrid(rows, cols);
 
         blocks = document.querySelectorAll(".block");
 
         blocks.forEach((block, index) => {
-            const pairId = shuffledIds[index];
+            const face = shuffledFaces[index];
             block.classList.remove("flipped");
             block.innerHTML = "";
-            block.dataset.pairId = pairId;
 
-            if (pairId <= REAL_IMAGES) {
-                // Real image card
+            if (face.type === "image") {
                 const img = document.createElement("img");
-                img.src = `./images/img${pairId}.jpg`;
-                img.alt = "Memory Image";
+                img.src  = face.src;
+                img.alt  = face.name || "Character";
                 img.style.display = "none";
                 block.appendChild(img);
                 block.dataset.cardType = "image";
             } else {
-                // Emoji / colour placeholder card
-                const eIdx = (pairId - REAL_IMAGES - 1) % EMOJI_POOL.length;
-                const { emoji, color } = EMOJI_POOL[eIdx];
-                const face = document.createElement("div");
-                face.classList.add("emoji-face");
-                face.textContent = emoji;
-                face.style.backgroundColor = color;
-                face.style.display = "none";
-                block.appendChild(face);
+                const emojiEl = document.createElement("div");
+                emojiEl.classList.add("emoji-face");
+                emojiEl.textContent = face.emoji;
+                emojiEl.style.backgroundColor = face.color;
+                emojiEl.style.display = "none";
+                block.appendChild(emojiEl);
                 block.dataset.cardType = "emoji";
             }
+
+            // Store face src/emoji as the match key (reliable deduplication)
+            block.dataset.matchKey = face.type === "image" ? face.src : face.emoji;
 
             block.removeEventListener("click", flipBlock);
             block.addEventListener("click", flipBlock);
@@ -167,6 +248,7 @@ document.addEventListener("DOMContentLoaded", () => {
             gameStarted = true;
             document.getElementById("player-count").disabled = true;
             lockGridControls();
+            lockThemeControl();
         }
 
         if (lockBoard) return;
@@ -187,7 +269,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function checkForMatch() {
-        const isMatch = firstBlock.dataset.pairId === secondBlock.dataset.pairId;
+        const isMatch = firstBlock.dataset.matchKey === secondBlock.dataset.matchKey;
         isMatch ? disableBlocks() : unflipBlocks();
     }
 
@@ -322,6 +404,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         document.getElementById("player-count").disabled = false;
         unlockGridControls();
+        unlockThemeControl();
         clearGridHintError();
 
         createScoreboard();
@@ -366,7 +449,17 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("rows-select").addEventListener("change", validateAndApplyGrid);
     document.getElementById("cols-select").addEventListener("change", validateAndApplyGrid);
 
+    document.getElementById("theme-select").addEventListener("change", function () {
+        if (gameStarted) return;
+        const selected = themes.find(t => t.id === this.value);
+        if (selected) {
+            applyTheme(selected);
+            resetGame();
+        }
+    });
+
     // ── Bootstrap ────────────────────────────────────────────────────────────
     createScoreboard();
-    initializeBoard();
+    // Themes are loaded first; loadThemes() calls initializeBoard() after
+    loadThemes();
 });
