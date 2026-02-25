@@ -147,7 +147,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         currentPlayer = 1;
-        document.getElementById("turn-indicator").textContent = `Player 1's Turn`;
+        if (totalPlayers === 1) {
+            document.getElementById("turn-indicator").textContent = `Practice Mode`;
+        } else {
+            document.getElementById("turn-indicator").textContent = `Player 1's Turn`;
+        }
     }
 
     // ── Grid controls: lock / unlock ─────────────────────────────────────────
@@ -225,13 +229,15 @@ document.addEventListener("DOMContentLoaded", () => {
             const f2 = secondBlock.querySelector("img, .emoji-face");
             if (f2) f2.style.display = "none";
 
-            currentPlayer++;
-            if (currentPlayer > totalPlayers) {
-                currentPlayer = 1;
-            }
+            if (totalPlayers > 1) {
+                currentPlayer++;
+                if (currentPlayer > totalPlayers) {
+                    currentPlayer = 1;
+                }
 
-            document.getElementById("turn-indicator").textContent =
-                `Player ${currentPlayer}'s Turn`;
+                document.getElementById("turn-indicator").textContent =
+                    `Player ${currentPlayer}'s Turn`;
+            }
 
             resetBoard();
         }, 1000);
@@ -266,8 +272,11 @@ document.addEventListener("DOMContentLoaded", () => {
         // Single winner
         if (winners.length === 1) {
             const popup = document.getElementById("congratulation-popup");
-            popup.querySelector("p").textContent =
-                `Player ${winners[0]} Wins! 🏆`;
+            if (totalPlayers === 1) {
+                popup.querySelector("p").textContent = "You completed the game! 🏆";
+            } else {
+                popup.querySelector("p").textContent = `Player ${winners[0]} Wins! 🏆`;
+            }
             popup.style.display = "block";
             return;
         }
