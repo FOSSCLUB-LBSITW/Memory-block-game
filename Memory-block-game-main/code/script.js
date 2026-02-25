@@ -265,3 +265,25 @@ document.addEventListener("DOMContentLoaded", () => {
     createScoreboard();
     initializeBoard();
 });
+document.addEventListener("DOMContentLoaded", () => {
+
+    /* ── THEME TOGGLE ─────────────────── */
+    const themeBtn = document.getElementById("theme-toggle");
+    const savedTheme = localStorage.getItem("theme");
+
+    if (savedTheme === "dark") {
+        document.body.classList.add("dark");
+        themeBtn.textContent = "☀️ Light Mode";
+    }
+
+    themeBtn.addEventListener("click", () => {
+        document.body.classList.toggle("dark");
+        const isDark = document.body.classList.contains("dark");
+        themeBtn.textContent = isDark ? "☀️ Light Mode" : "🌙 Dark Mode";
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+    });
+    /* ────────────────────────────────── */
+
+    // 🔊 Sound logic (your existing code can stay here)
+    // 🎮 Game logic (unchanged)
+});
