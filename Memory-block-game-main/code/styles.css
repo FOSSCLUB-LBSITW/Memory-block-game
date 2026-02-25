@@ -98,7 +98,8 @@ body {
     background: #1d4ed8;
 }
 
-/* ── Scoreboard / Settings panel ─────────────────────────────── */
+/* ================= SCOREBOARD ================= */
+/* ================= IMPROVED PLAYER SCORES & TURN INDICATOR ================= */
 .scoreboard {
     width: 260px;
     background: white;
@@ -107,16 +108,28 @@ body {
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
 }
 
+/* Remove or comment out the Game Settings heading */
 .scoreboard h2 {
-    margin-top: 0;
+    display: none; /* Hides the Game Settings heading */
 }
 
-.scoreboard select {
-    width: 100%;
-    padding: 8px;
-    margin: 10px 0 20px 0;
+/* Clean Turn Indicator */
+#turn-indicator {
+    background: linear-gradient(135deg, #2563eb, #1e3a8a);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 22px;
+    font-weight: bold;
+    margin: 15px 0;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+    border-left: 5px solid #fbbf24;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
+/* Enhanced Score Cards */
 /* ── Grid size controls ───────────────────────────────────────── */
 .setting-group {
     margin-bottom: 16px;
@@ -182,16 +195,79 @@ select:disabled {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    margin-top: 10px;
 }
 
 .score-card {
-    background: #1e40af;
-    color: white;
-    padding: 10px;
+    padding: 12px 15px;
     border-radius: 8px;
     font-weight: bold;
+    font-size: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
 }
 
+/* Player 1 - Red */
+.score-card:nth-child(1) {
+    background: #ef4444;
+    color: white;
+}
+
+/* Player 2 - Blue */
+.score-card:nth-child(2) {
+    background: #3b82f6;
+    color: white;
+}
+
+/* Player 3 - Green */
+.score-card:nth-child(3) {
+    background: #10b981;
+    color: white;
+}
+
+/* Player 4 - Orange */
+.score-card:nth-child(4) {
+    background: #f59e0b;
+    color: white;
+}
+
+/* Player 5 - Purple */
+.score-card:nth-child(5) {
+    background: #8b5cf6;
+    color: white;
+}
+
+/* Player 6 - Pink */
+.score-card:nth-child(6) {
+    background: #ec4899;
+    color: white;
+}
+
+/* Score value styling */
+.score-card span:last-child {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    min-width: 40px;
+    text-align: center;
+}
+
+/* Select dropdown styling - keep it simple */
+.scoreboard select {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0 15px 0;
+    border: 2px solid #3b82f6;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
 /* ── Congratulation popup ─────────────────────────────────────── */
 #congratulation-popup {
     position: fixed;
@@ -275,4 +351,51 @@ select:disabled {
 
 #volume-slider {
     width: 100%;
+
+/* ================= CLEAR TURN INDICATOR ================= */
+
+/* Current player - Distinct background */
+.score-card.current-turn {
+    background: linear-gradient(135deg, #2a2a2a, #1a1a1a) !important;
+    border: 4px solid #FFD700 !important;
+    box-shadow: 0 0 30px #FFD700, inset 0 0 20px rgba(255, 215, 0, 0.3) !important;
+    transform: scale(1.05);
+    color: #FFD700 !important;
+}
+
+/* Make the score stand out */
+.score-card.current-turn .score-value {
+    background: #FFD700 !important;
+    color: #000 !important;
+    font-weight: bold;
+    box-shadow: 0 0 20px #FFD700;
+}
+
+/* Add text indicator */
+.score-card.current-turn .player-label::after {
+    content: " (NOW PLAYING)";
+    font-size: 14px;
+    color: #FFD700;
+    font-weight: bold;
+    animation: fadePulse 1s infinite;
+    margin-left: 5px;
+}
+
+@keyframes fadePulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+/* Turn indicator styling */
+#turn-indicator {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: black;
+    padding: 15px;
+    border-radius: 10px;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    margin: 15px 0;
+    box-shadow: 0 0 30px #FFD700;
+    border: 2px solid white;
 }
