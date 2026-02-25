@@ -334,3 +334,68 @@ select:disabled {
         padding: 20px;
     }
 }
+/* ── Sound controls ───────────────────────── */
+#mute-btn {
+    padding: 6px 12px;
+    margin-bottom: 8px;
+    border: none;
+    background: #2563eb;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+#mute-btn:hover {
+    background: #1d4ed8;
+}
+
+#volume-slider {
+    width: 100%;
+
+/* ================= CLEAR TURN INDICATOR ================= */
+
+/* Current player - Distinct background */
+.score-card.current-turn {
+    background: linear-gradient(135deg, #2a2a2a, #1a1a1a) !important;
+    border: 4px solid #FFD700 !important;
+    box-shadow: 0 0 30px #FFD700, inset 0 0 20px rgba(255, 215, 0, 0.3) !important;
+    transform: scale(1.05);
+    color: #FFD700 !important;
+}
+
+/* Make the score stand out */
+.score-card.current-turn .score-value {
+    background: #FFD700 !important;
+    color: #000 !important;
+    font-weight: bold;
+    box-shadow: 0 0 20px #FFD700;
+}
+
+/* Add text indicator */
+.score-card.current-turn .player-label::after {
+    content: " (NOW PLAYING)";
+    font-size: 14px;
+    color: #FFD700;
+    font-weight: bold;
+    animation: fadePulse 1s infinite;
+    margin-left: 5px;
+}
+
+@keyframes fadePulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+/* Turn indicator styling */
+#turn-indicator {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: black;
+    padding: 15px;
+    border-radius: 10px;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    margin: 15px 0;
+    box-shadow: 0 0 30px #FFD700;
+    border: 2px solid white;
+}
