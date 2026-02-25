@@ -25,6 +25,26 @@
 
     <div class="scoreboard">
         <h2>Game Settings</h2>
+        <!-- 🔊 Sound Controls -->
+<div class="setting-group">
+    <label>Sound</label>
+
+    <button id="mute-btn">🔊 Mute</button>
+
+    <input
+        type="range"
+        id="volume-slider"
+        min="0"
+        max="1"
+        step="0.1"
+        value="1"
+    >
+</div>
+
+<!-- 🎵 Audio elements -->
+<audio id="flip-sound" src="./sounds/flip.mp3"></audio>
+<audio id="match-sound" src="./sounds/match.mp3"></audio>
+<audio id="wrong-sound" src="./sounds/wrong.mp3"></audio>
         <div class="setting-group">
             <label>Select Difficulty:</label>
 <select id="difficulty-select">
