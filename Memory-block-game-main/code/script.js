@@ -1,3 +1,6 @@
+let isPaused = false;
+let pausedTime = 0;
+
 document.addEventListener("DOMContentLoaded", () => {
     const REAL_IMAGES = 18;
 
@@ -13,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
         { emoji: "🎪", color: "#db2777" }, { emoji: "🦄", color: "#9333ea" }
     ];
 
-    /* ── Sound setup (NEW) ───────────────────── */
+    /* ── Sound setup ───────────────────── */
     const flipSound = document.getElementById("flip-sound");
     const matchSound = document.getElementById("match-sound");
     const wrongSound = document.getElementById("wrong-sound");
@@ -35,12 +38,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     function playSound(sound) {
-        if (!isMuted) {
+        if (!isMuted && !isPaused) {
             sound.currentTime = 0;
             sound.play();
         }
     }
-    /* ───────────────────────────────────────── */
+    /* ─────────────────────────────────── */
 
     let blocks = [];
     let matchedPairs = 0;
@@ -163,7 +166,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function flipBlock() {
-        if (lockBoard || gameOver || this === firstBlock) return;
+        if (isPaused || lockBoard || gameOver || this === firstBlock) return;
 
         if (!gameStarted) {
             gameStarted = true;
@@ -216,6 +219,8 @@ document.addEventListener("DOMContentLoaded", () => {
         playSound(wrongSound);
 
         setTimeout(() => {
+            if (isPaused) return;
+
             [firstBlock, secondBlock].forEach(block => {
                 block.classList.remove("flipped");
                 block.querySelector(".emoji-face").style.display = "none";
@@ -237,6 +242,7 @@ document.addEventListener("DOMContentLoaded", () => {
         matchedPairs = 0;
         gameStarted = false;
         gameOver = false;
+        isPaused = false;
 
         document.getElementById("player-count").disabled = false;
         document.getElementById("difficulty-select").disabled = false;
@@ -247,6 +253,17 @@ document.addEventListener("DOMContentLoaded", () => {
         initializeBoard();
         document.getElementById("congratulation-popup").style.display = "none";
     }
+
+    /* ── Pause / Resume button ───────────── */
+    const pauseBtn = document.getElementById("pause-btn");
+
+    if (pauseBtn) {
+        pauseBtn.addEventListener("click", () => {
+            isPaused = !isPaused;
+            pauseBtn.textContent = isPaused ? "▶ Resume" : "⏸ Pause";
+        });
+    }
+    /* ───────────────────────────────────── */
 
     document.getElementById("reset").addEventListener("click", resetGame);
     document.getElementById("play-again").addEventListener("click", resetGame);
