@@ -142,7 +142,18 @@ document.addEventListener("DOMContentLoaded", () => {
             face.style.display = "none";
             block.appendChild(face);
 
-            block.addEventListener("click", flipBlock);
+            block.setAttribute("tabindex", "0");
+block.setAttribute("role", "button");
+block.setAttribute("aria-label", "Memory card");
+
+block.addEventListener("click", flipBlock);
+
+block.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        flipBlock.call(block);
+    }
+});
         });
 
         resetBoard();

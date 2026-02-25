@@ -399,3 +399,16 @@ select:disabled {
     box-shadow: 0 0 30px #FFD700;
     border: 2px solid white;
 }
+}
+/* ── Keyboard Accessibility ───────────────────── */
+
+.block:focus-visible {
+    outline: 4px solid #fbbf24;
+    outline-offset: 4px;
+}
+
+button:focus-visible,
+select:focus-visible {
+    outline: 3px solid #fbbf24;
+    outline-offset: 3px;
+}
