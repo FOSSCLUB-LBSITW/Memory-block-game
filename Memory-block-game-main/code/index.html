@@ -6,9 +6,9 @@
     <title>Memory Block Game</title>
     <link rel="stylesheet" href="styles.css">
     <script defer src="script.js"></script>
-
     <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
 </head>
+
 <body>
 
 <h1 class="title">Memory Block Game</h1>
@@ -16,10 +16,7 @@
 <div class="main-container">
 
     <div class="game-section">
-        <div class="game" id="game-grid">
-            <!-- Blocks are generated dynamically by JS -->
-        </div>
-
+        <div class="game" id="game-grid"></div>
         <button id="reset">New Game</button>
     </div>
 
@@ -31,7 +28,32 @@
                 <option value="">Loading themes…</option>
             </select>
         </div>
+
+        <!-- 🌗 THEME TOGGLE -->
         <div class="setting-group">
+            <label>Theme</label>
+            <button id="theme-toggle">🌙 Dark Mode</button>
+        </div>
+
+        <!-- 🔊 Sound Controls -->
+        <div class="setting-group">
+            <label>Sound</label>
+            <button id="mute-btn">🔊 Mute</button>
+            <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="1">
+        </div>
+
+        <audio id="flip-sound" src="./sounds/flip.mp3"></audio>
+        <audio id="match-sound" src="./sounds/match.mp3"></audio>
+        <audio id="wrong-sound" src="./sounds/wrong.mp3"></audio>
+
+        <div class="setting-group">
+            <label>Select Difficulty:</label>
+            <select id="difficulty-select">
+                <option value="easy">Easy</option>
+                <option value="medium" selected>Medium</option>
+                <option value="hard">Hard</option>
+            </select>
+
             <label>Grid Size:</label>
             <div class="grid-inputs">
                 <div class="grid-input-item">
@@ -56,7 +78,6 @@
                     </select>
                 </div>
             </div>
-            <p class="grid-hint" id="grid-hint">At least one of rows or columns must be even.</p>
         </div>
 
         <label>Select Players:</label>
@@ -69,7 +90,6 @@
         </select>
 
         <h3 id="turn-indicator">Player 1's Turn</h3>
-
         <div id="scores-container"></div>
     </div>
 

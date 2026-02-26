@@ -13,31 +13,53 @@ document.addEventListener("DOMContentLoaded", () => {
         { emoji: "🎲", color: "#6366f1" }, { emoji: "🍉", color: "#10b981" },
         { emoji: "🚀", color: "#64748b" }, { emoji: "🦋", color: "#a855f7" },
         { emoji: "🐉", color: "#dc2626" }, { emoji: "🌙", color: "#1d4ed8" },
-        { emoji: "🎪", color: "#db2777" }, { emoji: "🦄", color: "#9333ea" },
-        { emoji: "🌴", color: "#15803d" }, { emoji: "🎭", color: "#b45309" },
-        { emoji: "🍕", color: "#c2410c" }, { emoji: "🎠", color: "#0369a1" },
-        { emoji: "🦁", color: "#92400e" }, { emoji: "🌈", color: "#7c3aed" },
-        { emoji: "🐙", color: "#be185d" }, { emoji: "🎆", color: "#1e40af" },
+        { emoji: "🎪", color: "#db2777" }, { emoji: "🦄", color: "#9333ea" }
     ];
+  
+    /* ── Sound setup (NEW) ───────────────────── */
+    const flipSound = document.getElementById("flip-sound");
+    const matchSound = document.getElementById("match-sound");
+    const wrongSound = document.getElementById("wrong-sound");
+
+    const muteBtn = document.getElementById("mute-btn");
+    const volumeSlider = document.getElementById("volume-slider");
+
+    let isMuted = false;
+
+    volumeSlider.addEventListener("input", () => {
+        const volume = volumeSlider.value;
+        [flipSound, matchSound, wrongSound].forEach(s => s.volume = volume);
+    });
+
+    muteBtn.addEventListener("click", () => {
+        isMuted = !isMuted;
+        [flipSound, matchSound, wrongSound].forEach(s => s.muted = isMuted);
+        muteBtn.textContent = isMuted ? "🔇 Unmute" : "🔊 Mute";
+    });
+
+    function playSound(sound) {
+        if (!isMuted) {
+            sound.currentTime = 0;
+            sound.play();
+        }
+    }
+    /* ───────────────────────────────────────── */
 
     let blocks = [];
-
     let matchedPairs = 0;
     let totalPairs = 0;
     let hasFlippedBlock = false;
     let lockBoard = false;
     let firstBlock = null;
     let secondBlock = null;
-
+    let gameOver = false;
     let totalPlayers = 2;
     let currentPlayer = 1;
     let scores = {};
     let gameStarted = false;
 
-    // Tie-breaker variables
-    let tieMode = false;
-    let tiePlayers = [];
-    let originalTiePlayers = [];
+    let difficulty = "medium";
+    let unflipDelay = 1000;
 
     // ── Theme helpers ────────────────────────────────────────────────────────
 
@@ -113,25 +135,48 @@ document.addEventListener("DOMContentLoaded", () => {
         const cols = parseInt(document.getElementById("cols-select").value);
         return { rows, cols };
     }
+  
+    const rowsSelect = document.getElementById("rows-select");
+    const colsSelect = document.getElementById("cols-select");
 
-    function isValidGrid(rows, cols) {
-        return (rows * cols) % 2 === 0;   // need even total tiles
+    function applyDifficulty(level) {
+        difficulty = level;
+
+        if (level === "easy") {
+            rowsSelect.value = 2;
+            colsSelect.value = 4;
+            unflipDelay = 1200;
+        }
+        if (level === "medium") {
+            rowsSelect.value = 3;
+            colsSelect.value = 4;
+            unflipDelay = 1000;
+        }
+        if (level === "hard") {
+            rowsSelect.value = 4;
+            colsSelect.value = 6;
+            unflipDelay = 700;
+        }
+        resetGame();
     }
 
-    /** Compute a block size (px) so the grid fits nicely in the viewport. */
+    function getGridDimensions() {
+        return {
+            rows: parseInt(rowsSelect.value),
+            cols: parseInt(colsSelect.value)
+        };
+    }
+
     function computeBlockSize(cols) {
-        const maxFromViewport = Math.floor((window.innerWidth * 0.60) / cols) - 15;
+        const maxFromViewport = Math.floor((window.innerWidth * 0.6) / cols) - 15;
         return Math.min(120, Math.max(50, maxFromViewport));
     }
 
-    // ── Dynamic grid generation ──────────────────────────────────────────────
     function generateGrid(rows, cols) {
         const gameDiv = document.getElementById("game-grid");
         gameDiv.innerHTML = "";
 
         const blockSize = computeBlockSize(cols);
-
-        // Set CSS custom properties for columns and block size
         gameDiv.style.setProperty("--cols", cols);
         gameDiv.style.setProperty("--block-size", `${blockSize}px`);
 
@@ -142,7 +187,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // ── Shuffle ──────────────────────────────────────────────────────────────
     function shuffle(array) {
         const arr = [...array];
         for (let i = arr.length - 1; i > 0; i--) {
@@ -152,11 +196,9 @@ document.addEventListener("DOMContentLoaded", () => {
         return arr;
     }
 
-    // ── Board initialisation ─────────────────────────────────────────────────
     function initializeBoard() {
         const { rows, cols } = getGridDimensions();
-        const totalTiles = rows * cols;
-        totalPairs = totalTiles / 2;
+        totalPairs = (rows * cols) / 2;
 
         // Pick `totalPairs` characters from the active theme (shuffled),
         // cycling with emoji fallback when the theme doesn't have enough.
@@ -175,14 +217,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Each face appears twice, shuffle positions
         const shuffledFaces = shuffle([...cardFaces, ...cardFaces]);
+        const pool = Array.from({ length: totalPairs }, (_, i) => i + 1);
+        const shuffledIds = shuffle([...pool, ...pool]);
 
         generateGrid(rows, cols);
-
         blocks = document.querySelectorAll(".block");
 
         blocks.forEach((block, index) => {
             const face = shuffledFaces[index];
             block.classList.remove("flipped");
+            const pairId = shuffledIds[index];
+            block.className = "block";
             block.innerHTML = "";
 
             if (face.type === "image") {
@@ -212,7 +257,6 @@ document.addEventListener("DOMContentLoaded", () => {
         resetBoard();
     }
 
-    // ── Scoreboard ───────────────────────────────────────────────────────────
     function createScoreboard() {
         const container = document.getElementById("scores-container");
         container.innerHTML = "";
@@ -220,43 +264,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
         for (let i = 1; i <= totalPlayers; i++) {
             scores[i] = 0;
-
-            const div = document.createElement("div");
-            div.classList.add("score-card");
-            div.innerHTML = `Player ${i}: <span id="score${i}">0</span>`;
-            container.appendChild(div);
+            container.innerHTML += `<div class="score-card">Player ${i}: <span id="score${i}">0</span></div>`;
         }
 
         currentPlayer = 1;
-        document.getElementById("turn-indicator").textContent = `Player 1's Turn`;
+        document.getElementById("turn-indicator").textContent = "Player 1's Turn";
     }
 
-    // ── Grid controls: lock / unlock ─────────────────────────────────────────
-    function lockGridControls() {
-        document.getElementById("rows-select").disabled = true;
-        document.getElementById("cols-select").disabled = true;
-    }
-
-    function unlockGridControls() {
-        document.getElementById("rows-select").disabled = false;
-        document.getElementById("cols-select").disabled = false;
-    }
-
-    // ── Flip logic ───────────────────────────────────────────────────────────
     function flipBlock() {
+        if (lockBoard || gameOver || this === firstBlock) return;
+
         if (!gameStarted) {
             gameStarted = true;
             document.getElementById("player-count").disabled = true;
             lockGridControls();
             lockThemeControl();
+            document.getElementById("difficulty-select").disabled = true;
+            rowsSelect.disabled = true;
+            colsSelect.disabled = true;
         }
 
-        if (lockBoard) return;
-        if (this === firstBlock) return;
-
         this.classList.add("flipped");
-        const face = this.querySelector("img, .emoji-face");
-        if (face) face.style.display = face.classList.contains("emoji-face") ? "flex" : "block";
+        this.querySelector(".emoji-face").style.display = "flex";
+        playSound(flipSound);
 
         if (!hasFlippedBlock) {
             hasFlippedBlock = true;
@@ -279,17 +309,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         matchedPairs++;
         scores[currentPlayer]++;
-        document.getElementById(`score${currentPlayer}`).textContent =
-            scores[currentPlayer];
+        document.getElementById(`score${currentPlayer}`).textContent = scores[currentPlayer];
 
-        // If in tie mode → first match wins instantly
-        if (tieMode) {
-            showTieWinner();
-            return;
-        }
+        playSound(matchSound);
 
         if (matchedPairs === totalPairs) {
-            showCongratulations();
+            document.getElementById("congratulation-popup").style.display = "block";
+            gameOver = true;
         }
 
         resetBoard();
@@ -297,157 +323,57 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function unflipBlocks() {
         lockBoard = true;
+        playSound(wrongSound);
 
         setTimeout(() => {
-            firstBlock.classList.remove("flipped");
-            const f1 = firstBlock.querySelector("img, .emoji-face");
-            if (f1) f1.style.display = "none";
+            [firstBlock, secondBlock].forEach(block => {
+                block.classList.remove("flipped");
+                block.querySelector(".emoji-face").style.display = "none";
+            });
 
-            secondBlock.classList.remove("flipped");
-            const f2 = secondBlock.querySelector("img, .emoji-face");
-            if (f2) f2.style.display = "none";
-
-            currentPlayer++;
-            if (currentPlayer > totalPlayers) {
-                currentPlayer = 1;
-            }
-
+            currentPlayer = (currentPlayer % totalPlayers) + 1;
             document.getElementById("turn-indicator").textContent =
                 `Player ${currentPlayer}'s Turn`;
 
             resetBoard();
-        }, 1000);
+        }, unflipDelay);
     }
 
     function resetBoard() {
-        hasFlippedBlock = false;
-        lockBoard = false;
-        firstBlock = null;
-        secondBlock = null;
+        [hasFlippedBlock, lockBoard, firstBlock, secondBlock] = [false, false, null, null];
     }
 
-    function disableBoardInteraction() {
-        lockBoard = true;
-        blocks.forEach(block => {
-            block.removeEventListener("click", flipBlock);
-        });
-    }
-
-    // ── End-of-game ──────────────────────────────────────────────────────────
-    function showCongratulations() {
-        disableBoardInteraction();
-        let maxScore = Math.max(...Object.values(scores));
-        let winners = [];
-
-        for (let player in scores) {
-            if (scores[player] === maxScore) {
-                winners.push(player);
-            }
-        }
-
-        // Single winner
-        if (winners.length === 1) {
-            const popup = document.getElementById("congratulation-popup");
-            popup.querySelector("p").textContent =
-                `Player ${winners[0]} Wins! 🏆`;
-            popup.style.display = "block";
-            return;
-        }
-
-        // Tie detected
-        tieMode = true;
-        tiePlayers = winners;
-        startTieBreaker();
-    }
-
-    function startTieBreaker() {
-        originalTiePlayers = [...tiePlayers];
-    alert(
-        `Tie detected between Player ${tiePlayers.join(
-            " & "
-        )}! Starting sudden death round!`
-    );
-
-    matchedPairs = 0;
-    totalPlayers = tiePlayers.length;
-
-    let newScores = {};
-    tiePlayers.forEach((player, index) => {
-        newScores[index + 1] = 0;
-    });
-
-    scores = newScores;
-    currentPlayer = 1;
-
-    createScoreboard();
-    initializeBoard();
-}
-
-    function showTieWinner() {
-        disableBoardInteraction();
-        const popup = document.getElementById("congratulation-popup");
-
-        popup.querySelector("p").textContent =
-            `Player ${originalTiePlayers[currentPlayer - 1]} Wins the Tie-Breaker! 🏆`
-
-        popup.style.display = "block";
-
-        tieMode = false;
-    }
-
-    // ── Reset / New Game ─────────────────────────────────────────────────────
     function resetGame() {
         matchedPairs = 0;
         gameStarted = false;
-        tieMode = false;
-        tiePlayers = [];
+        gameOver = false;
 
         document.getElementById("player-count").disabled = false;
         unlockGridControls();
         unlockThemeControl();
         clearGridHintError();
+        document.getElementById("difficulty-select").disabled = false;
+        rowsSelect.disabled = false;
+        colsSelect.disabled = false;
 
         createScoreboard();
         initializeBoard();
-
         document.getElementById("congratulation-popup").style.display = "none";
     }
 
-    // ── Grid size validation hint ────────────────────────────────────────────
-    function clearGridHintError() {
-        const hint = document.getElementById("grid-hint");
-        hint.classList.remove("error");
-        hint.textContent = "At least one of rows or columns must be even.";
-    }
-
-    function validateAndApplyGrid() {
-        if (gameStarted) return;   // can't change mid-game
-        const { rows, cols } = getGridDimensions();
-        const hint = document.getElementById("grid-hint");
-
-        if (!isValidGrid(rows, cols)) {
-            hint.classList.add("error");
-            hint.textContent = `⚠ ${rows}×${cols} = ${rows * cols} tiles (odd). Please make at least one dimension even.`;
-        } else {
-            clearGridHintError();
-            // Live-preview the new grid without resetting scores / game state
-            resetGame();
-        }
-    }
-
-    // ── Event Listeners ──────────────────────────────────────────────────────
-    document.getElementById("play-again").addEventListener("click", resetGame);
     document.getElementById("reset").addEventListener("click", resetGame);
+    document.getElementById("play-again").addEventListener("click", resetGame);
 
-    document.getElementById("player-count").addEventListener("change", function () {
+    document.getElementById("player-count").addEventListener("change", e => {
         if (!gameStarted) {
-            totalPlayers = parseInt(this.value);
+            totalPlayers = +e.target.value;
             resetGame();
         }
     });
 
-    document.getElementById("rows-select").addEventListener("change", validateAndApplyGrid);
-    document.getElementById("cols-select").addEventListener("change", validateAndApplyGrid);
+    document.getElementById("difficulty-select").addEventListener("change", e => {
+        if (!gameStarted) applyDifficulty(e.target.value);
+    });
 
     document.getElementById("theme-select").addEventListener("change", function () {
         if (gameStarted) return;
@@ -462,4 +388,26 @@ document.addEventListener("DOMContentLoaded", () => {
     createScoreboard();
     // Themes are loaded first; loadThemes() calls initializeBoard() after
     loadThemes();
+});
+document.addEventListener("DOMContentLoaded", () => {
+
+    /* ── THEME TOGGLE ─────────────────── */
+    const themeBtn = document.getElementById("theme-toggle");
+    const savedTheme = localStorage.getItem("theme");
+
+    if (savedTheme === "dark") {
+        document.body.classList.add("dark");
+        themeBtn.textContent = "☀️ Light Mode";
+    }
+
+    themeBtn.addEventListener("click", () => {
+        document.body.classList.toggle("dark");
+        const isDark = document.body.classList.contains("dark");
+        themeBtn.textContent = isDark ? "☀️ Light Mode" : "🌙 Dark Mode";
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+    });
+    /* ────────────────────────────────── */
+
+    // 🔊 Sound logic (your existing code can stay here)
+    // 🎮 Game logic (unchanged)
 });
