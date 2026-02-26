@@ -1,6 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const REAL_IMAGES = 18;
+    // ── Theme state ──────────────────────────────────────────────────────────
+    let themes = [];
+    let activeTheme = null;
 
+    // Emoji pool — fallback when theme has fewer characters than needed
     const EMOJI_POOL = [
         { emoji: "🦊", color: "#f97316" }, { emoji: "🐬", color: "#0ea5e9" },
         { emoji: "🌸", color: "#ec4899" }, { emoji: "🍀", color: "#22c55e" },
@@ -12,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
         { emoji: "🐉", color: "#dc2626" }, { emoji: "🌙", color: "#1d4ed8" },
         { emoji: "🎪", color: "#db2777" }, { emoji: "🦄", color: "#9333ea" }
     ];
-
+  
     /* ── Sound setup (NEW) ───────────────────── */
     const flipSound = document.getElementById("flip-sound");
     const matchSound = document.getElementById("match-sound");
@@ -58,6 +61,81 @@ document.addEventListener("DOMContentLoaded", () => {
     let difficulty = "medium";
     let unflipDelay = 1000;
 
+    // ── Theme helpers ────────────────────────────────────────────────────────
+
+    /** Load themes.json, then fetch each theme's manifest.json to discover images. */
+    async function loadThemes() {
+        try {
+            const res = await fetch("./themes.json");
+            themes = await res.json();
+        } catch (e) {
+            console.warn("Could not load themes.json — using emoji fallback.", e);
+            themes = [];
+        }
+
+        // For each theme, fetch its folder/manifest.json to get the image list
+        await Promise.all(themes.map(async (theme) => {
+            try {
+                const res = await fetch(`${theme.folder}/manifest.json`);
+                const filenames = await res.json();
+                theme.characters = filenames.map(f => ({
+                    image: `${theme.folder}/${f}`
+                }));
+            } catch (e) {
+                console.warn(`Could not load manifest for theme "${theme.id}":`, e);
+                theme.characters = [];
+            }
+        }));
+
+        const sel = document.getElementById("theme-select");
+        sel.innerHTML = "";
+
+        if (themes.length === 0) {
+            sel.innerHTML = "<option value=''>No themes found</option>";
+            activeTheme = null;
+            return;
+        }
+
+        themes.forEach((theme) => {
+            const opt = document.createElement("option");
+            opt.value = theme.id;
+            opt.textContent = theme.name;
+            sel.appendChild(opt);
+        });
+
+        // Apply the first theme by default
+        applyTheme(themes[0]);
+        initializeBoard();
+    }
+
+    /** Apply visual theme (background, CSS accent colour) and store character list. */
+    function applyTheme(theme) {
+        activeTheme = theme;
+
+        // Background
+        document.body.style.backgroundImage = `url("${theme.backgroundUrl}")`;
+        document.body.style.backgroundSize   = "cover";
+        document.body.style.backgroundRepeat = "no-repeat";
+        document.body.style.backgroundPosition = "center";    
+
+        // CSS accent colour variables used by cards, buttons, indicator
+        const root = document.documentElement;
+        root.style.setProperty("--accent",      theme.accentColor     || "#1e3a8a");
+        root.style.setProperty("--accent-dark", theme.accentColorDark || "#172554");
+        root.style.setProperty("--title-color", theme.titleColor      || "#1e3a8a");
+    }
+
+    /** Lock / unlock the theme dropdown alongside other pre-game controls. */
+    function lockThemeControl()   { document.getElementById("theme-select").disabled = true;  }
+    function unlockThemeControl() { document.getElementById("theme-select").disabled = false; }
+
+    // ── Grid size helpers ────────────────────────────────────────────────────
+    function getGridDimensions() {
+        const rows = parseInt(document.getElementById("rows-select").value);
+        const cols = parseInt(document.getElementById("cols-select").value);
+        return { rows, cols };
+    }
+  
     const rowsSelect = document.getElementById("rows-select");
     const colsSelect = document.getElementById("cols-select");
 
@@ -122,6 +200,23 @@ document.addEventListener("DOMContentLoaded", () => {
         const { rows, cols } = getGridDimensions();
         totalPairs = (rows * cols) / 2;
 
+        // Pick `totalPairs` characters from the active theme (shuffled),
+        // cycling with emoji fallback when the theme doesn't have enough.
+        const themeChars = activeTheme ? shuffle([...activeTheme.characters]) : [];
+
+        // Build card-face descriptors indexed 1..totalPairs
+        const cardFaces = [];
+        for (let i = 0; i < totalPairs; i++) {
+            if (i < themeChars.length) {
+                cardFaces.push({ type: "image", src: themeChars[i].image, name: themeChars[i].name });
+            } else {
+                const eIdx = (i - themeChars.length) % EMOJI_POOL.length;
+                cardFaces.push({ type: "emoji", ...EMOJI_POOL[eIdx] });
+            }
+        }
+
+        // Each face appears twice, shuffle positions
+        const shuffledFaces = shuffle([...cardFaces, ...cardFaces]);
         const pool = Array.from({ length: totalPairs }, (_, i) => i + 1);
         const shuffledIds = shuffle([...pool, ...pool]);
 
@@ -129,19 +224,33 @@ document.addEventListener("DOMContentLoaded", () => {
         blocks = document.querySelectorAll(".block");
 
         blocks.forEach((block, index) => {
+            const face = shuffledFaces[index];
+            block.classList.remove("flipped");
             const pairId = shuffledIds[index];
             block.className = "block";
             block.innerHTML = "";
-            block.dataset.pairId = pairId;
 
-            const e = EMOJI_POOL[(pairId - 1) % EMOJI_POOL.length];
-            const face = document.createElement("div");
-            face.className = "emoji-face";
-            face.textContent = e.emoji;
-            face.style.backgroundColor = e.color;
-            face.style.display = "none";
-            block.appendChild(face);
+            if (face.type === "image") {
+                const img = document.createElement("img");
+                img.src  = face.src;
+                img.alt  = face.name || "Character";
+                img.style.display = "none";
+                block.appendChild(img);
+                block.dataset.cardType = "image";
+            } else {
+                const emojiEl = document.createElement("div");
+                emojiEl.classList.add("emoji-face");
+                emojiEl.textContent = face.emoji;
+                emojiEl.style.backgroundColor = face.color;
+                emojiEl.style.display = "none";
+                block.appendChild(emojiEl);
+                block.dataset.cardType = "emoji";
+            }
 
+            // Store face src/emoji as the match key (reliable deduplication)
+            block.dataset.matchKey = face.type === "image" ? face.src : face.emoji;
+
+            block.removeEventListener("click", flipBlock);
             block.addEventListener("click", flipBlock);
         });
 
@@ -168,6 +277,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!gameStarted) {
             gameStarted = true;
             document.getElementById("player-count").disabled = true;
+            lockGridControls();
+            lockThemeControl();
             document.getElementById("difficulty-select").disabled = true;
             rowsSelect.disabled = true;
             colsSelect.disabled = true;
@@ -188,9 +299,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function checkForMatch() {
-        firstBlock.dataset.pairId === secondBlock.dataset.pairId
-            ? disableBlocks()
-            : unflipBlocks();
+        const isMatch = firstBlock.dataset.matchKey === secondBlock.dataset.matchKey;
+        isMatch ? disableBlocks() : unflipBlocks();
     }
 
     function disableBlocks() {
@@ -239,6 +349,9 @@ document.addEventListener("DOMContentLoaded", () => {
         gameOver = false;
 
         document.getElementById("player-count").disabled = false;
+        unlockGridControls();
+        unlockThemeControl();
+        clearGridHintError();
         document.getElementById("difficulty-select").disabled = false;
         rowsSelect.disabled = false;
         colsSelect.disabled = false;
@@ -262,8 +375,19 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!gameStarted) applyDifficulty(e.target.value);
     });
 
+    document.getElementById("theme-select").addEventListener("change", function () {
+        if (gameStarted) return;
+        const selected = themes.find(t => t.id === this.value);
+        if (selected) {
+            applyTheme(selected);
+            resetGame();
+        }
+    });
+
+    // ── Bootstrap ────────────────────────────────────────────────────────────
     createScoreboard();
-    initializeBoard();
+    // Themes are loaded first; loadThemes() calls initializeBoard() after
+    loadThemes();
 });
 document.addEventListener("DOMContentLoaded", () => {
 

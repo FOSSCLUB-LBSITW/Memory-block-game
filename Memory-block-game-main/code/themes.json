@@ -1,0 +1,20 @@
+[
+  {
+    "id": "demon-slayer",
+    "name": "Demon Slayer",
+    "folder": "./images/demon-slayer",
+    "backgroundUrl": "https://wallpaperaccess.com/full/7418018.png",
+    "accentColor": "#004d99",
+    "accentColorDark": "#00274d",
+    "titleColor": "#00274d"
+  },
+  {
+    "id": "naruto",
+    "name": "Naruto",
+    "folder": "./images/naruto",
+    "backgroundUrl": "https://wallpaperaccess.com/full/122476.jpg",
+    "accentColor": "#f5771b",
+    "accentColorDark": "#a95213",
+    "titleColor": "#fff"
+  }
+]
