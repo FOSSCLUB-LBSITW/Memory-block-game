@@ -1,3 +1,9 @@
+:root {
+    --accent: #1e3a8a;
+    --accent-dark: #172554;
+    --title-color: #1e3a8a;
+}
+
 /* ── THEME VARIABLES ───────────────────── */
 :root {
     --bg-color: #dbeafe;
@@ -17,7 +23,11 @@ body.dark {
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background: var(--bg-color);
+    background-color: #dbeafe;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    min-height: 100vh;
     color: var(--text-color);
     display: flex;
     flex-direction: column;
@@ -27,6 +37,7 @@ body {
 .title {
     font-family: 'Russo One', sans-serif;
     font-size: 48px;
+    color: var(--title-color);
     margin: 20px 0;
 }
 
@@ -44,11 +55,13 @@ body {
 
 /* ── BLOCKS ───────────────────────────── */
 .block {
-    width: var(--block-size);
-    height: var(--block-size);
-    background: var(--block-bg);
+    width: var(--block-size, 120px);
+    height: var(--block-size, 120px);
+    background: var(--accent, #1e3a8a);
     border-radius: 12px;
     cursor: pointer;
+    position: relative;
+    transition: transform 0.3s ease, background 0.4s ease;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -59,7 +72,31 @@ body {
 }
 
 .emoji-face {
-    font-size: 48px;
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    display: none;
+    /* JS sets display:flex when flipped */
+    justify-content: center;
+    align-items: center;
+    font-size: calc(var(--block-size, 120px) * 0.45);
+    line-height: 1;
+}
+
+/* ── Buttons ──────────────────────────────────────────────────── */
+#reset {
+    padding: 10px 20px;
+    border: none;
+    background: var(--accent, #2563eb);
+    color: white;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+#reset:hover {
+    background: var(--accent-dark, #1d4ed8);
 }
 
 /* ── SCOREBOARD ───────────────────────── */
@@ -68,6 +105,57 @@ body {
     background: var(--card-bg);
     padding: 20px;
     border-radius: 15px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Remove or comment out the Game Settings heading */
+.scoreboard h2 {
+    display: none; /* Hides the Game Settings heading */
+}
+
+/* Clean Turn Indicator */
+#turn-indicator {
+    background: linear-gradient(135deg, var(--accent, #2563eb), var(--accent-dark, #1e3a8a));
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 22px;
+    font-weight: bold;
+    margin: 15px 0;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+    border-left: 5px solid #fbbf24;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: background 0.4s ease;
+}
+
+/* Enhanced Score Cards */
+/* ── Grid size controls ───────────────────────────────────────── */
+.setting-group {
+    margin-bottom: 16px;
+}
+
+.setting-group>label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.grid-inputs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.grid-input-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    color: #555;
 }
 
 /* ── BUTTONS ──────────────────────────── */
