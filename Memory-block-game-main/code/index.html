@@ -42,10 +42,14 @@
             <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="1">
         </div>
 
-        <audio id="flip-sound" src="./sounds/flip.mp3"></audio>
-        <audio id="match-sound" src="./sounds/match.mp3"></audio>
-        <audio id="wrong-sound" src="./sounds/wrong.mp3"></audio>
+        <!-- 🔊 Sound Effects -->
+<audio id="flip-sound" src="./sounds/flip.mp3"></audio>
+<audio id="match-sound" src="./sounds/match.mp3"></audio>
+<audio id="mismatch-sound" src="./sounds/mismatch.mp3"></audio>
+<audio id="win-sound" src="./sounds/win.mp3"></audio>
 
+<!-- 🎵 Background Music -->
+<audio id="bg-music" src="./sounds/bg.mp3" loop></audio>
         <div class="setting-group">
             <label>Select Difficulty:</label>
             <select id="difficulty-select">

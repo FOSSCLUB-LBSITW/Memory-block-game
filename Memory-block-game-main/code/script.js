@@ -16,34 +16,75 @@ document.addEventListener("DOMContentLoaded", () => {
         { emoji: "🎪", color: "#db2777" }, { emoji: "🦄", color: "#9333ea" }
     ];
   
-    /* ── Sound setup (NEW) ───────────────────── */
-    const flipSound = document.getElementById("flip-sound");
-    const matchSound = document.getElementById("match-sound");
-    const wrongSound = document.getElementById("wrong-sound");
+    /* ── SOUND SYSTEM ───────────────────────────────── */
 
-    const muteBtn = document.getElementById("mute-btn");
-    const volumeSlider = document.getElementById("volume-slider");
+const flipSound = document.getElementById("flip-sound");
+const matchSound = document.getElementById("match-sound");
+const mismatchSound = document.getElementById("mismatch-sound");
+const winSound = document.getElementById("win-sound");
+const bgMusic = document.getElementById("bg-music");
 
-    let isMuted = false;
+const muteBtn = document.getElementById("mute-btn");
+const volumeSlider = document.getElementById("volume-slider");
 
-    volumeSlider.addEventListener("input", () => {
-        const volume = volumeSlider.value;
-        [flipSound, matchSound, wrongSound].forEach(s => s.volume = volume);
-    });
+let isMuted = localStorage.getItem("isMuted") === "true";
+// Load saved volume or default to 1
+let savedVolume = localStorage.getItem("volume");
+if (savedVolume === null) {
+    savedVolume = 1;
+} else {
+    savedVolume = parseFloat(savedVolume);
+}
 
-    muteBtn.addEventListener("click", () => {
-        isMuted = !isMuted;
-        [flipSound, matchSound, wrongSound].forEach(s => s.muted = isMuted);
-        muteBtn.textContent = isMuted ? "🔇 Unmute" : "🔊 Mute";
-    });
+volumeSlider.value = savedVolume;
 
-    function playSound(sound) {
-        if (!isMuted) {
-            sound.currentTime = 0;
-            sound.play();
-        }
+// Set initial volume
+[flipSound, matchSound, mismatchSound, winSound, bgMusic].forEach(s => {
+    s.volume = savedVolume;
+});
+[flipSound, matchSound, mismatchSound, winSound, bgMusic]
+    .forEach(s => s.muted = isMuted);
+
+muteBtn.textContent = isMuted ? "🔇 Unmute" : "🔊 Mute";
+
+// Volume control
+volumeSlider.addEventListener("input", () => {
+    const volume = volumeSlider.value;
+
+    [flipSound, matchSound, mismatchSound, winSound, bgMusic]
+        .forEach(s => s.volume = volume);
+
+    localStorage.setItem("volume", volume);
+});
+
+// Mute button
+muteBtn.addEventListener("click", () => {
+    isMuted = !isMuted;
+
+    [flipSound, matchSound, mismatchSound, winSound, bgMusic]
+        .forEach(s => s.muted = isMuted);
+
+    muteBtn.textContent = isMuted ? "🔇 Unmute" : "🔊 Mute";
+
+    localStorage.setItem("isMuted", isMuted);
+});
+
+// Play helper
+function playSound(sound) {
+    if (!isMuted) {
+        sound.currentTime = 0;
+        sound.play();
     }
-    /* ───────────────────────────────────────── */
+}
+
+// 🎵 Start background music on first interaction
+document.addEventListener("click", () => {
+    if (!isMuted) {
+        bgMusic.play().catch(() => {});
+    }
+}, { once: true });
+
+/* ─────────────────────────────────────────────── */
 
     let blocks = [];
     let matchedPairs = 0;
@@ -287,10 +328,18 @@ document.addEventListener("DOMContentLoaded", () => {
             rowsSelect.disabled = true;
             colsSelect.disabled = true;
         }
+this.classList.add("flipped");
 
-        this.classList.add("flipped");
-        this.querySelector(".emoji-face").style.display = "flex";
-        playSound(flipSound);
+const face = this.querySelector("img, .emoji-face");
+if (face) {
+    if (face.tagName === "IMG") {
+        face.style.display = "block";
+    } else {
+        face.style.display = "flex";
+    }
+}
+
+playSound(flipSound);
 
         if (!hasFlippedBlock) {
             hasFlippedBlock = true;
@@ -318,6 +367,7 @@ document.addEventListener("DOMContentLoaded", () => {
         playSound(matchSound);
 
         if (matchedPairs === totalPairs) {
+            playSound(winSound);
             document.getElementById("congratulation-popup").style.display = "block";
             gameOver = true;
         }
@@ -327,7 +377,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function unflipBlocks() {
         lockBoard = true;
-        playSound(wrongSound);
+        playSound(mismatchSound);
 
         setTimeout(() => {
             firstBlock.classList.remove("flipped");
