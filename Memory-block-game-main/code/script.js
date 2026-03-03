@@ -268,7 +268,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         currentPlayer = 1;
-        document.getElementById("turn-indicator").textContent = "Player 1's Turn";
+        if (totalPlayers === 1) {
+            document.getElementById("turn-indicator").textContent = `Practice Mode`;
+        } else {
+            document.getElementById("turn-indicator").textContent = `Player 1's Turn`;
+        }
     }
 
     function flipBlock() {
@@ -326,21 +330,70 @@ document.addEventListener("DOMContentLoaded", () => {
         playSound(wrongSound);
 
         setTimeout(() => {
-            [firstBlock, secondBlock].forEach(block => {
-                block.classList.remove("flipped");
-                block.querySelector(".emoji-face").style.display = "none";
-            });
+            firstBlock.classList.remove("flipped");
+            const f1 = firstBlock.querySelector("img, .emoji-face");
+            if (f1) f1.style.display = "none";
 
-            currentPlayer = (currentPlayer % totalPlayers) + 1;
-            document.getElementById("turn-indicator").textContent =
-                `Player ${currentPlayer}'s Turn`;
+            secondBlock.classList.remove("flipped");
+            const f2 = secondBlock.querySelector("img, .emoji-face");
+            if (f2) f2.style.display = "none";
+
+            if (totalPlayers > 1) {
+                currentPlayer++;
+                if (currentPlayer > totalPlayers) {
+                    currentPlayer = 1;
+                }
+
+                document.getElementById("turn-indicator").textContent =
+                    `Player ${currentPlayer}'s Turn`;
+            }
 
             resetBoard();
         }, unflipDelay);
     }
 
     function resetBoard() {
-        [hasFlippedBlock, lockBoard, firstBlock, secondBlock] = [false, false, null, null];
+        hasFlippedBlock = false;
+        lockBoard = false;
+        firstBlock = null;
+        secondBlock = null;
+    }
+
+    function disableBoardInteraction() {
+        lockBoard = true;
+        blocks.forEach(block => {
+            block.removeEventListener("click", flipBlock);
+        });
+    }
+
+    // ── End-of-game ──────────────────────────────────────────────────────────
+    function showCongratulations() {
+        disableBoardInteraction();
+        let maxScore = Math.max(...Object.values(scores));
+        let winners = [];
+
+        for (let player in scores) {
+            if (scores[player] === maxScore) {
+                winners.push(player);
+            }
+        }
+
+        // Single winner
+        if (winners.length === 1) {
+            const popup = document.getElementById("congratulation-popup");
+            if (totalPlayers === 1) {
+                popup.querySelector("p").textContent = "You completed the game! 🏆";
+            } else {
+                popup.querySelector("p").textContent = `Player ${winners[0]} Wins! 🏆`;
+            }
+            popup.style.display = "block";
+            return;
+        }
+
+        // Tie detected
+        tieMode = true;
+        tiePlayers = winners;
+        startTieBreaker();
     }
 
     function resetGame() {
