@@ -171,12 +171,6 @@ document.addEventListener("click", () => {
     function unlockThemeControl() { document.getElementById("theme-select").disabled = false; }
 
     // ── Grid size helpers ────────────────────────────────────────────────────
-    function getGridDimensions() {
-        const rows = parseInt(document.getElementById("rows-select").value);
-        const cols = parseInt(document.getElementById("cols-select").value);
-        return { rows, cols };
-    }
-  
     const rowsSelect = document.getElementById("rows-select");
     const colsSelect = document.getElementById("cols-select");
 
