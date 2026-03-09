@@ -322,7 +322,6 @@ document.addEventListener("click", () => {
         if (!gameStarted) {
             gameStarted = true;
             document.getElementById("player-count").disabled = true;
-            lockGridControls();
             lockThemeControl();
             document.getElementById("difficulty-select").disabled = true;
             rowsSelect.disabled = true;
@@ -452,9 +451,7 @@ playSound(flipSound);
         gameOver = false;
 
         document.getElementById("player-count").disabled = false;
-        unlockGridControls();
         unlockThemeControl();
-        clearGridHintError();
         document.getElementById("difficulty-select").disabled = false;
         rowsSelect.disabled = false;
         colsSelect.disabled = false;
