@@ -368,7 +368,7 @@ playSound(flipSound);
 
         if (matchedPairs === totalPairs) {
             playSound(winSound);
-            document.getElementById("congratulation-popup").style.display = "block";
+            showCongratulations();
             gameOver = true;
         }
 
@@ -428,22 +428,18 @@ playSound(flipSound);
             }
         }
 
-        // Single winner
+        const popup = document.getElementById("congratulation-popup");
         if (winners.length === 1) {
-            const popup = document.getElementById("congratulation-popup");
             if (totalPlayers === 1) {
                 popup.querySelector("p").textContent = "You completed the game! 🏆";
             } else {
                 popup.querySelector("p").textContent = `Player ${winners[0]} Wins! 🏆`;
             }
-            popup.style.display = "block";
-            return;
+        } else {
+            // Handle the tie gracefully
+            popup.querySelector("p").textContent = `It's a Tie between Players ${winners.join(" & ")}! 🤝`;
         }
-
-        // Tie detected
-        tieMode = true;
-        tiePlayers = winners;
-        startTieBreaker();
+        popup.style.display = "block";
     }
 
     function resetGame() {
